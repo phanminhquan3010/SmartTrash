@@ -1,0 +1,275 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f1f8f4;
+    color: #1b1b1b;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+h1 {
+    font-size: 42px;
+    margin-bottom: 5px;
+}
+
+h2 {
+    margin-top: 40px;
+}
+
+/* =========================
+   NAME BOX
+========================= */
+
+.name-box {
+    background: white;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.name-box input {
+    padding: 12px;
+    width: 60%;
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.name-box button {
+    padding: 12px 20px;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.name-box button:hover {
+    background: #1b5e20;
+}
+
+/* =========================
+   TRASH GRID
+========================= */
+
+.trash-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    max-width: 700px;
+    margin: auto;
+}
+
+.trash-grid form {
+    margin: 0;
+}
+
+.trash-card {
+    width: 100%;
+    padding: 20px;
+    background: white;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.trash-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.trash-card h3 {
+    font-size: 20px;
+}
+
+.trash-card p {
+    font-size: 13px;
+}
+
+/* =========================
+   LEADERBOARD
+========================= */
+
+.leaderboard {
+    background: white;
+    max-width: 650px;
+    margin: 40px auto 20px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.leaderboard h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.leaderboard-subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Each player */
+
+.player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 14px;
+    margin: 8px 0;
+
+    background: #f1f8f3;
+    border-radius: 12px;
+
+    transition: 0.2s;
+}
+
+.player:hover {
+    transform: scale(1.02);
+}
+
+/* Rank */
+
+.rank {
+    min-width: 35px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Player name */
+
+.player-name {
+    flex: 1;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* Score */
+
+.player-score {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.player-score small {
+    color: #555;
+}
+
+/* Current player */
+
+.current-player {
+    border: 2px solid #2e7d32;
+    background: #e8f5e9;
+}
+
+/* =========================
+   RESULT PAGE
+========================= */
+
+.result {
+    background: white;
+    max-width: 500px;
+    margin: 80px auto;
+    padding: 40px;
+    text-align: center;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.result-icon {
+    font-size: 70px;
+}
+
+.result h1 {
+    font-size: 32px;
+}
+
+.result h2 {
+    margin: 20px 0;
+}
+
+.result p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #2e7d32;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.back-button:hover {
+    background: #1b5e20;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+    margin-top: 25px;
+    color: #777;
+    font-size: 13px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .container {
+        padding: 25px 12px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    .trash-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .name-box input {
+        width: 85%;
+    }
+
+    .name-box button {
+        margin-top: 5px;
+    }
+
+    .player {
+        padding: 12px 8px;
+        gap: 6px;
+    }
+
+    .player-score {
+        font-size: 13px;
+    }
+
+    .player-name {
+        font-size: 14px;
+    }
+}

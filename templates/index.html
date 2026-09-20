@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Smart Trash</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- TITLE -->
+
+    <h1>
+        🗑️ SMART TRASH
+    </h1>
+
+    <p>
+        Phân loại rác thông minh ♻️
+    </p>
+
+
+    <!-- PLAYER BOX -->
+
+    <div class="name-box">
+
+
+        {% if username %}
+
+
+            <h2>
+                👋 Xin chào, {{ username }}!
+            </h2>
+
+
+            <p>
+                Sẵn sàng thử thách kiến thức môi trường?
+            </p>
+
+
+            <!-- CHANGE NAME -->
+
+            <form
+                action="/change_name"
+                method="POST"
+            >
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Tên mới..."
+                    maxlength="20"
+                    required
+                >
+
+                <button type="submit">
+                    ✏️ Đổi nickname
+                </button>
+
+            </form>
+
+
+            <br>
+
+
+            <!-- START NEW QUIZ -->
+
+            <a
+                class="back-button"
+                href="/start_quiz"
+            >
+                🚀 Bắt đầu Quiz
+            </a>
+
+
+        {% else %}
+
+
+            <h2>
+                👤 Nhập tên của bạn
+            </h2>
+
+
+            <form
+                action="/set_name"
+                method="POST"
+            >
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Tên của bạn..."
+                    maxlength="20"
+                    required
+                >
+
+
+                <button type="submit">
+                    🚀 Bắt đầu
+                </button>
+
+            </form>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+
+    <!-- LEADERBOARD -->
+
+    <div class="leaderboard">
+
+
+        <h2>
+            🏆 TOP PLAYERS
+        </h2>
+
+
+        <p class="leaderboard-subtitle">
+            🌱 Ai sẽ trở thành Eco Champion?
+        </p>
+
+
+        {% if players %}
+
+
+            {% for player in players %}
+
+
+            <div
+                class="
+                    player
+                    {% if player['name'] == username %}
+                        current-player
+                    {% endif %}
+                "
+            >
+
+
+                <!-- RANK -->
+
+                <span class="rank">
+
+                    {% if loop.index == 1 %}
+
+                        🥇
+
+                    {% elif loop.index == 2 %}
+
+                        🥈
+
+                    {% elif loop.index == 3 %}
+
+                        🥉
+
+                    {% else %}
+
+                        #{{ loop.index }}
+
+                    {% endif %}
+
+                </span>
+
+
+                <!-- NAME -->
+
+                <span class="player-name">
+
+                    {{ player["name"] }}
+
+
+                    {% if player["name"] == username %}
+
+                        ⭐ Bạn
+
+                    {% endif %}
+
+                </span>
+
+
+                <!-- SCORE -->
+
+                <span class="player-score">
+
+                    🌱 {{ player["score"] }}
+
+                    <small>
+                        · ♻️ {{ player["items"] }}
+                    </small>
+
+                </span>
+
+
+            </div>
+
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <p>
+                🌱 Chưa có người chơi nào.
+            </p>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+
+    <!-- FOOTER -->
+
+    <p class="footer">
+
+        ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
+
+    </p>
+
+
+</div>
+
+
+</body>
+
+</html>
