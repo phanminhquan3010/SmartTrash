@@ -44,6 +44,10 @@ def setup_database():
     conn.close()
 
 
+# IMPORTANT FOR RENDER
+setup_database()
+
+
 # =========================
 # HOME
 # =========================
@@ -196,7 +200,6 @@ def start_quiz():
 
     conn = get_db()
 
-    # Delete old quiz progress
     conn.execute(
         """
         DELETE FROM answered_questions
@@ -205,7 +208,6 @@ def start_quiz():
         (name,)
     )
 
-    # Reset score and correct answers
     conn.execute(
         """
         UPDATE players
@@ -219,10 +221,9 @@ def start_quiz():
     conn.commit()
     conn.close()
 
-    # Clear current question
     session.pop("current_question", None)
 
-    return redirect("/quiz")
+    return redirect("/SmartTrash")
 
 
 # =========================
@@ -238,7 +239,6 @@ def quiz():
 
     conn = get_db()
 
-    # Get questions already answered
     answered_rows = conn.execute(
         """
         SELECT question_id
@@ -253,7 +253,6 @@ def quiz():
         for row in answered_rows
     }
 
-    # Get player
     player = conn.execute(
         """
         SELECT score, items
@@ -263,7 +262,6 @@ def quiz():
         (name,)
     ).fetchone()
 
-    # Recreate player if missing
     if player is None:
         conn.execute(
             """
@@ -287,13 +285,11 @@ def quiz():
 
     conn.close()
 
-    # Find unanswered questions
     available = [
         q for q in QUESTIONS
         if q["id"] not in answered_ids
     ]
 
-    # All questions completed
     if not available:
         return render_template(
             "quiz.html",
@@ -305,13 +301,11 @@ def quiz():
             username=name
         )
 
-    # Pick next question in order
     question = min(
         available,
         key=lambda q: q["id"]
     )
 
-    # Remember current question
     session["current_question"] = question["id"]
 
     return render_template(
@@ -339,9 +333,8 @@ def answer():
     question_id = session.get("current_question")
 
     if question_id is None:
-        return redirect("/quiz")
+        return redirect("/SmartTrash")
 
-    # Find current question
     question = None
 
     for q in QUESTIONS:
@@ -351,17 +344,15 @@ def answer():
 
     if question is None:
         session.pop("current_question", None)
-        return redirect("/quiz")
+        return redirect("/SmartTrash")
 
     selected_answer = request.form.get("answer")
     correct_answer = question["answer"]
 
-    # Check answer
     is_correct = selected_answer == correct_answer
 
     conn = get_db()
 
-    # Check if already answered
     already_answered = conn.execute(
         """
         SELECT id
@@ -375,9 +366,8 @@ def answer():
     if already_answered is not None:
         conn.close()
         session.pop("current_question", None)
-        return redirect("/quiz")
+        return redirect("/SmartTrash")
 
-    # Give points for correct answer
     if is_correct:
         conn.execute(
             """
@@ -389,7 +379,6 @@ def answer():
             (name,)
         )
 
-    # Save answered question
     conn.execute(
         """
         INSERT INTO answered_questions
@@ -401,7 +390,6 @@ def answer():
 
     conn.commit()
 
-    # Get updated player
     player = conn.execute(
         """
         SELECT score, items
@@ -411,7 +399,6 @@ def answer():
         (name,)
     ).fetchone()
 
-    # Count answered questions
     answered_count = conn.execute(
         """
         SELECT COUNT(*)
@@ -423,10 +410,8 @@ def answer():
 
     conn.close()
 
-    # Remove current question from session
     session.pop("current_question", None)
 
-    # Finished all questions
     if answered_count >= QUESTIONS_PER_ROUND:
         return render_template(
             "quiz.html",
@@ -441,7 +426,6 @@ def answer():
             username=name
         )
 
-    # Show feedback
     return render_template(
         "quiz.html",
         question=question,
@@ -495,8 +479,6 @@ def leaderboard():
 # =========================
 
 if __name__ == "__main__":
-    setup_database()
-
     app.run(
         debug=True,
         host="127.0.0.1",
