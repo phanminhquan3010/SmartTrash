@@ -5,309 +5,184 @@
 
     <meta charset="UTF-8">
 
-    <title>SmartTrash - Quiz</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTrash Quiz</title>
 
-    <style>
-
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #dff7e3, #e8f5e9);
-            margin: 0;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-
-        h1 {
-            color: #2e7d32;
-        }
-
-        h2 {
-            color: #333;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 20px 0;
-            font-size: 18px;
-        }
-
-        .stat {
-            background: #f1f8e9;
-            padding: 12px 20px;
-            border-radius: 12px;
-        }
-
-        .question {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 30px 0;
-        }
-
-        .answer-button {
-            display: block;
-            width: 100%;
-            margin: 12px 0;
-            padding: 15px;
-            font-size: 18px;
-            border: none;
-            border-radius: 12px;
-            background: #81c784;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .answer-button:hover {
-            background: #43a047;
-            transform: scale(1.02);
-        }
-
-        .feedback {
-            margin: 25px 0;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .correct {
-            background: #d8f5dc;
-            color: #2e7d32;
-            border: 2px solid #66bb6a;
-        }
-
-        .wrong {
-            background: #ffebee;
-            color: #c62828;
-            border: 2px solid #ef5350;
-        }
-
-        .correct-answer {
-            margin-top: 12px;
-            font-size: 17px;
-            color: #333;
-        }
-
-        .continue-button {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 15px 30px;
-            background: #2e7d32;
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .continue-button:hover {
-            background: #1b5e20;
-        }
-
-        .back-button {
-            display: inline-block;
-            margin-top: 25px;
-            padding: 12px 20px;
-            background: #777;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-        }
-
-        .completed {
-            font-size: 22px;
-            color: #2e7d32;
-            margin: 30px;
-        }
-
-        .big-score {
-            font-size: 35px;
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
-    </style>
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
 
 </head>
 
 
 <body>
 
+
 <div class="container">
 
-    <h1>🌱 SmartTrash Quiz</h1>
 
-    <h2>Xin chào, {{ username }}!</h2>
+    {% if finished %}
 
+        <h1>🎉 Hoàn thành!</h1>
 
-    <div class="stats">
+        <h2>
+            Bạn đã hoàn thành {{ total }} câu hỏi!
+        </h2>
 
-        <div class="stat">
-            ⭐ Điểm:
-            <strong>{{ score }}</strong>
-        </div>
+        <p>
+            ⭐ Điểm: <strong>{{ score }}</strong>
+        </p>
 
-        <div class="stat">
-            ♻️ Câu đúng:
-            <strong>{{ items }}</strong>
-        </div>
-
-    </div>
-
-
-    {% if feedback %}
-
-        <div class="question">
-            {{ question["id"] }}. {{ question["question"] }}
-        </div>
-
-
-        {% if is_correct %}
-
-            <div class="feedback correct">
-
-                🎉 CHÍNH XÁC!
-
-                <div class="correct-answer">
-                    Bạn nhận được <strong>+10 điểm!</strong> 🌱
-                </div>
-
-            </div>
-
-        {% else %}
-
-            <div class="feedback wrong">
-
-                ❌ CHƯA ĐÚNG!
-
-                <div class="correct-answer">
-                    Đáp án đúng là:
-                    <strong>{{ correct_answer }}</strong>
-                </div>
-
-                <div class="correct-answer">
-                    Không sao! Bạn vừa học thêm một điều về phân loại rác. 🌍
-                </div>
-
-            </div>
-
-        {% endif %}
-
-
-        {% if completed %}
-
-            <div class="completed">
-
-                🎉 Bạn đã hoàn thành 100 câu hỏi!
-
-                <p>Điểm cuối cùng:</p>
-
-                <div class="big-score">
-                    {{ score }} điểm
-                </div>
-
-            </div>
-
-            <a class="continue-button" href="/leaderboard">
-                🏆 Xem bảng xếp hạng
-            </a>
-
-            <br>
-
-            <a class="back-button" href="/">
-                🏠 Về trang chủ
-            </a>
-
-        {% else %}
-
-            <a class="continue-button" href="/quiz">
-                ➡️ Tiếp tục
-            </a>
-
-            <br>
-
-            <a class="back-button" href="/">
-                🏠 Về trang chủ
-            </a>
-
-        {% endif %}
-
-
-    {% elif completed %}
-
-        <div class="completed">
-
-            🎉 Bạn đã hoàn thành 100 câu hỏi!
-
-            <p>Điểm của bạn:</p>
-
-            <div class="big-score">
-                {{ score }} điểm
-            </div>
-
-        </div>
-
-        <a class="continue-button" href="/leaderboard">
-            🏆 Xem bảng xếp hạng
-        </a>
+        <p>
+            ✅ Số câu đúng:
+            <strong>{{ correct }}</strong>
+        </p>
 
         <br>
 
-        <a class="back-button" href="/">
-            🏠 Về trang chủ
+        <a href="/start_quiz">
+            <button>
+                🔄 Chơi lại
+            </button>
+        </a>
+
+        <br><br>
+
+        <a href="/">
+            <button>
+                🏠 Về trang chủ
+            </button>
         </a>
 
 
     {% else %}
 
-        <div class="question">
 
-            {{ question["id"] }}.
-            {{ question["question"] }}
-
-        </div>
+        {% if question %}
 
 
-        <form action="/answer" method="POST">
+            <!-- ========================= -->
+            <!-- PROGRESS -->
+            <!-- ========================= -->
 
-            {% for option in question["options"] %}
+            <h2>
+                Câu {{ question_number }}/{{ total_questions }}
+            </h2>
 
-                <button
-                    class="answer-button"
-                    type="submit"
-                    name="answer"
-                    value="{{ option }}"
+
+            <!-- ========================= -->
+            <!-- SCORE -->
+            <!-- ========================= -->
+
+            <p>
+                ⭐ Điểm:
+                <strong>{{ score }}</strong>
+            </p>
+
+            <p>
+                ✅ Đúng:
+                <strong>{{ correct }}</strong>
+            </p>
+
+
+            <hr>
+
+
+            <!-- ========================= -->
+            <!-- QUESTION -->
+            <!-- ========================= -->
+
+            <h1>
+                {{ question.question }}
+            </h1>
+
+
+            {% if not answered %}
+
+                <form
+                    action="/answer"
+                    method="POST"
                 >
 
-                    {{ option }}
+                    {% for option in question.options %}
 
-                </button>
+                        <button
+                            type="submit"
+                            name="answer"
+                            value="{{ option }}"
+                            style="display:block; width:100%; margin:10px 0;"
+                        >
+                            {{ option }}
+                        </button>
 
-            {% endfor %}
+                    {% endfor %}
 
-        </form>
+                </form>
 
 
-        <a class="back-button" href="/">
-            🏠 Về trang chủ
-        </a>
+            {% else %}
+
+
+                <!-- ========================= -->
+                <!-- ANSWER RESULT -->
+                <!-- ========================= -->
+
+                {% if is_correct %}
+
+                    <h2>
+                        🎉 Chính xác!
+                    </h2>
+
+                    <p>
+                        Bạn nhận được <strong>10 điểm</strong>!
+                    </p>
+
+                {% else %}
+
+                    <h2>
+                        ❌ Chưa chính xác!
+                    </h2>
+
+                    <p>
+                        Đáp án đúng là:
+                        <strong>{{ question.answer }}</strong>
+                    </p>
+
+                {% endif %}
+
+
+                <br>
+
+
+                <!-- ========================= -->
+                <!-- CONTINUE -->
+                <!-- ========================= -->
+
+                <a href="/quiz">
+
+                    <button>
+                        ➡️ Câu tiếp theo
+                    </button>
+
+                </a>
+
+
+            {% endif %}
+
+
+        {% endif %}
+
 
     {% endif %}
 
+
 </div>
+
 
 </body>
 
