@@ -2,8 +2,11 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background: #f1f8f4;
-    color: #1b1b1b;
+
+    background:
+        linear-gradient(135deg, #e8f5e9, #f1f8f4);
+
+    color: #173b20;
 }
 
 .container {
@@ -13,6 +16,7 @@ body {
     text-align: center;
 }
 
+
 /* =========================
    TITLE
 ========================= */
@@ -20,11 +24,13 @@ body {
 h1 {
     font-size: 42px;
     margin-bottom: 5px;
+    color: #1b5e20;
 }
 
 h2 {
     margin-top: 40px;
 }
+
 
 /* =========================
    NAME BOX
@@ -35,24 +41,33 @@ h2 {
     padding: 20px;
     margin: 20px auto;
     max-width: 600px;
+
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+
+    border: 2px solid #a5d6a7;
+
+    box-shadow: 0 5px 15px rgba(46, 125, 50, 0.12);
 }
 
 .name-box input {
     padding: 12px;
     width: 60%;
+
     border: 2px solid #2e7d32;
     border-radius: 8px;
+
     font-size: 16px;
 }
 
 .name-box button {
     padding: 12px 20px;
+
     background: #2e7d32;
     color: white;
+
     border: none;
     border-radius: 8px;
+
     cursor: pointer;
     font-weight: bold;
 }
@@ -60,6 +75,7 @@ h2 {
 .name-box button:hover {
     background: #1b5e20;
 }
+
 
 /* =========================
    TRASH GRID
@@ -69,6 +85,7 @@ h2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
+
     max-width: 700px;
     margin: auto;
 }
@@ -80,26 +97,36 @@ h2 {
 .trash-card {
     width: 100%;
     padding: 20px;
+
     background: white;
-    border: none;
+
+    border: 2px solid #c8e6c9;
     border-radius: 15px;
+
     box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+
     cursor: pointer;
     transition: 0.2s;
 }
 
 .trash-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+
+    border-color: #4caf50;
+
+    box-shadow:
+        0 8px 20px rgba(46, 125, 50, 0.2);
 }
 
 .trash-card h3 {
     font-size: 20px;
+    color: #2e7d32;
 }
 
 .trash-card p {
     font-size: 13px;
 }
+
 
 /* =========================
    LEADERBOARD
@@ -107,11 +134,17 @@ h2 {
 
 .leaderboard {
     background: white;
+
     max-width: 650px;
     margin: 40px auto 20px;
     padding: 25px;
+
     border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+
+    border: 2px solid #81c784;
+
+    box-shadow:
+        0 8px 25px rgba(46, 125, 50, 0.15);
 }
 
 .leaderboard h2 {
@@ -125,7 +158,10 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Each player */
+
+/* =========================
+   PLAYER
+========================= */
 
 .player {
     display: flex;
@@ -136,6 +172,7 @@ h2 {
     margin: 8px 0;
 
     background: #f1f8f3;
+
     border-radius: 12px;
 
     transition: 0.2s;
@@ -145,23 +182,17 @@ h2 {
     transform: scale(1.02);
 }
 
-/* Rank */
-
 .rank {
     min-width: 35px;
     font-size: 20px;
     font-weight: bold;
 }
 
-/* Player name */
-
 .player-name {
     flex: 1;
     text-align: left;
     font-weight: bold;
 }
-
-/* Score */
 
 .player-score {
     font-weight: bold;
@@ -172,57 +203,166 @@ h2 {
     color: #555;
 }
 
-/* Current player */
-
 .current-player {
     border: 2px solid #2e7d32;
     background: #e8f5e9;
 }
 
+
+/* ==================================================
+   🌱 SMART TRASH QUIZ
+================================================== */
+
+.quiz-option {
+    display: block;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    margin: 14px 0;
+    padding: 17px 20px;
+
+    border: 2px solid #4caf50;
+    border-radius: 14px;
+
+    background: linear-gradient(
+        135deg,
+        #f1f8e9,
+        #e8f5e9
+    );
+
+    color: #1b5e20;
+
+    font-size: 17px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+
+    box-shadow:
+        0 3px 8px rgba(46, 125, 50, 0.08);
+}
+
+
+/* HOVER */
+
+.quiz-option:hover {
+    background: linear-gradient(
+        135deg,
+        #c8e6c9,
+        #a5d6a7
+    );
+
+    border-color: #2e7d32;
+
+    color: #124d1b;
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 6px 15px rgba(46, 125, 50, 0.2);
+}
+
+
+/* CLICK */
+
+.quiz-option:active {
+    transform: scale(0.98);
+}
+
+
 /* =========================
-   RESULT PAGE
+   QUESTION TITLE
 ========================= */
 
-.result {
-    background: white;
-    max-width: 500px;
-    margin: 80px auto;
-    padding: 40px;
-    text-align: center;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+.leaderboard > h2:first-child {
+    color: #1b5e20;
+
+    background: #e8f5e9;
+
+    border-left: 6px solid #4caf50;
+
+    padding: 18px 20px;
+
+    border-radius: 12px;
+
+    line-height: 1.4;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 3px 10px rgba(46, 125, 50, 0.08);
 }
 
-.result-icon {
-    font-size: 70px;
+
+/* =========================
+   CORRECT
+========================= */
+
+.correct-box {
+    padding: 18px;
+    margin-top: 15px;
+
+    border-radius: 14px;
+
+    background: #e8f5e9;
+
+    border: 2px solid #4caf50;
+
+    color: #2e7d32;
+
+    box-shadow:
+        0 4px 12px rgba(46, 125, 50, 0.12);
 }
 
-.result h1 {
-    font-size: 32px;
+
+/* =========================
+   WRONG
+========================= */
+
+.wrong-box {
+    padding: 18px;
+    margin-top: 15px;
+
+    border-radius: 14px;
+
+    background: #fff3e0;
+
+    border: 2px solid #ff9800;
+
+    color: #e65100;
 }
 
-.result h2 {
-    margin: 20px 0;
-}
 
-.result p {
-    font-size: 18px;
-    line-height: 1.6;
-}
+/* =========================
+   BUTTON
+========================= */
 
 .back-button {
     display: inline-block;
+
     margin-top: 15px;
     padding: 12px 20px;
+
     background: #2e7d32;
     color: white;
+
     text-decoration: none;
+
     border-radius: 8px;
+
+    font-weight: bold;
+
+    transition: 0.2s;
 }
 
 .back-button:hover {
     background: #1b5e20;
+
+    transform: translateY(-2px);
 }
+
 
 /* =========================
    FOOTER
@@ -230,9 +370,12 @@ h2 {
 
 .footer {
     margin-top: 25px;
-    color: #777;
+
+    color: #558b5d;
+
     font-size: 13px;
 }
+
 
 /* =========================
    MOBILE
@@ -272,59 +415,9 @@ h2 {
     .player-name {
         font-size: 14px;
     }
-}
-/* ========================= */
-/* SMART TRASH QUIZ */
-/* ========================= */
 
-.quiz-option {
-    display: block;
-    width: 100%;
-    margin: 12px 0;
-    padding: 15px 18px;
-
-    border: 2px solid #4caf50;
-    border-radius: 12px;
-
-    background: #f1f8e9;
-    color: #245c2a;
-
-    font-size: 17px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-
-.quiz-option:hover {
-    background: #c8e6c9;
-    transform: translateY(-2px);
-}
-
-
-.correct-box {
-    padding: 18px;
-    margin-top: 15px;
-
-    border-radius: 14px;
-
-    background: #e8f5e9;
-    border: 2px solid #4caf50;
-
-    color: #2e7d32;
-}
-
-
-.wrong-box {
-    padding: 18px;
-    margin-top: 15px;
-
-    border-radius: 14px;
-
-    background: #fff3e0;
-    border: 2px solid #ff9800;
-
-    color: #e65100;
+    .quiz-option {
+        font-size: 16px;
+        padding: 15px;
+    }
 }
