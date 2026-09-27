@@ -55,7 +55,35 @@
             </p>
 
 
-            <!-- CHANGE NAME -->
+            <!-- START -->
+
+            <a
+                class="back-button"
+                href="/start_quiz"
+            >
+                🚀 Bắt đầu Quiz
+            </a>
+
+
+            <br>
+            <br>
+
+
+            <!-- SWITCH PLAYER -->
+
+            <a
+                class="back-button"
+                href="/switch_player"
+            >
+                👤 Đổi người chơi
+            </a>
+
+
+            <br>
+            <br>
+
+
+            <!-- CHANGE / ADD NAME -->
 
             <form
                 action="/change_name"
@@ -65,29 +93,16 @@
                 <input
                     type="text"
                     name="name"
-                    placeholder="Tên mới..."
+                    placeholder="Tên người chơi..."
                     maxlength="20"
                     required
                 >
 
                 <button type="submit">
-                    ✏️ Đổi nickname
+                    ➕ Chuyển sang tên này
                 </button>
 
             </form>
-
-
-            <br>
-
-
-            <!-- START NEW QUIZ -->
-
-            <a
-                class="back-button"
-                href="/start_quiz"
-            >
-                🚀 Bắt đầu Quiz
-            </a>
 
 
         {% else %}
@@ -123,7 +138,6 @@
 
 
     </div>
-
 
 
     <!-- LEADERBOARD -->
@@ -229,7 +243,6 @@
 
 
     </div>
-
 
 
     <!-- FOOTER -->
