@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, session, redirect
 import sqlite3
-import os
 import random
+import os
+
 from questions import get_questions
 
 app = Flask(__name__)
@@ -11,23 +12,19 @@ QUESTIONS = get_questions()
 QUESTIONS_PER_ROUND = 100
 
 
-# =========================
-# DATABASE
-# =========================
-
 def get_db():
     conn = sqlite3.connect("smarttrash.db")
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def setup_database():
+def init_db():
     conn = get_db()
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS players (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL,
+            name TEXT UNIQUE,
             score INTEGER DEFAULT 0,
             items INTEGER DEFAULT 0
         )
@@ -35,9 +32,8 @@ def setup_database():
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS answered_questions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_name TEXT NOT NULL,
-            question_id INTEGER NOT NULL,
+            player_name TEXT,
+            question_id INTEGER,
             UNIQUE(player_name, question_id)
         )
     """)
@@ -46,7 +42,7 @@ def setup_database():
     conn.close()
 
 
-setup_database()
+init_db()
 
 
 # =========================
@@ -54,33 +50,20 @@ setup_database()
 # =========================
 
 @app.route("/")
-def home():
-    username = session.get("username")
-
+def index():
     conn = get_db()
 
-    rows = conn.execute("""
+    players = conn.execute("""
         SELECT name, score, items
         FROM players
-        ORDER BY score DESC, items DESC
-        LIMIT 20
+        ORDER BY score DESC
     """).fetchall()
 
     conn.close()
 
-    leaderboard = []
-
-    for row in rows:
-        leaderboard.append({
-            "name": row["name"],
-            "score": row["score"],
-            "items": row["items"]
-        })
-
     return render_template(
         "index.html",
-        username=username,
-        leaderboard=leaderboard
+        players=players
     )
 
 
@@ -95,35 +78,23 @@ def set_name():
     if not name:
         return redirect("/")
 
-    if len(name) > 30:
-        name = name[:30]
+    session["player"] = name
 
     conn = get_db()
 
     player = conn.execute(
-        """
-        SELECT name
-        FROM players
-        WHERE name = ?
-        """,
+        "SELECT * FROM players WHERE name = ?",
         (name,)
     ).fetchone()
 
-    if player is None:
+    if not player:
         conn.execute(
-            """
-            INSERT INTO players
-            (name, score, items)
-            VALUES (?, 0, 0)
-            """,
+            "INSERT INTO players (name, score, items) VALUES (?, 0, 0)",
             (name,)
         )
-
         conn.commit()
 
     conn.close()
-
-    session["username"] = name
 
     return redirect("/")
 
@@ -134,56 +105,35 @@ def set_name():
 
 @app.route("/change_name", methods=["POST"])
 def change_name():
-    old_name = session.get("username")
-
-    if not old_name:
-        return redirect("/")
-
+    old_name = session.get("player")
     new_name = request.form.get("name", "").strip()
 
-    if not new_name:
+    if not old_name or not new_name:
         return redirect("/")
-
-    if len(new_name) > 30:
-        new_name = new_name[:30]
 
     conn = get_db()
 
     existing = conn.execute(
-        """
-        SELECT name
-        FROM players
-        WHERE name = ?
-        """,
+        "SELECT * FROM players WHERE name = ?",
         (new_name,)
     ).fetchone()
 
-    if existing is not None and new_name != old_name:
-        conn.close()
-        return redirect("/")
+    if not existing:
+        conn.execute(
+            "UPDATE players SET name = ? WHERE name = ?",
+            (new_name, old_name)
+        )
 
-    conn.execute(
-        """
-        UPDATE players
-        SET name = ?
-        WHERE name = ?
-        """,
-        (new_name, old_name)
-    )
+        conn.execute(
+            "UPDATE answered_questions SET player_name = ? WHERE player_name = ?",
+            (new_name, old_name)
+        )
 
-    conn.execute(
-        """
-        UPDATE answered_questions
-        SET player_name = ?
-        WHERE player_name = ?
-        """,
-        (new_name, old_name)
-    )
+        conn.commit()
 
-    conn.commit()
+        session["player"] = new_name
+
     conn.close()
-
-    session["username"] = new_name
 
     return redirect("/")
 
@@ -194,39 +144,35 @@ def change_name():
 
 @app.route("/start_quiz")
 def start_quiz():
-    if "username" not in session:
-        return redirect("/")
+    player = session.get("player")
 
-    name = session["username"]
+    if not player:
+        return redirect("/")
 
     conn = get_db()
 
-    conn.execute(
-        """
-        DELETE FROM answered_questions
-        WHERE player_name = ?
-        """,
-        (name,)
-    )
-
-    conn.execute(
-        """
+    # Reset score
+    conn.execute("""
         UPDATE players
         SET score = 0,
             items = 0
         WHERE name = ?
-        """,
-        (name,)
-    )
+    """, (player,))
+
+    # Remove old answered questions
+    conn.execute("""
+        DELETE FROM answered_questions
+        WHERE player_name = ?
+    """, (player,))
 
     conn.commit()
     conn.close()
 
-    # Clear the old random order
+    # Clear old round
     session.pop("round_questions", None)
     session.pop("current_question", None)
 
-    return redirect("/SmartTrash")
+    return redirect("/quiz")
 
 
 # =========================
@@ -236,85 +182,60 @@ def start_quiz():
 @app.route("/SmartTrash")
 @app.route("/quiz")
 def quiz():
-    if "username" not in session:
-        return redirect("/")
+    player = session.get("player")
 
-    name = session["username"]
+    if not player:
+        return redirect("/")
 
     conn = get_db()
 
-    answered_rows = conn.execute(
-        """
+    answered_rows = conn.execute("""
         SELECT question_id
         FROM answered_questions
         WHERE player_name = ?
-        """,
-        (name,)
-    ).fetchall()
+    """, (player,)).fetchall()
 
     answered_ids = {
         row["question_id"]
         for row in answered_rows
     }
 
-    player = conn.execute(
-        """
+    player_data = conn.execute("""
         SELECT score, items
         FROM players
         WHERE name = ?
-        """,
-        (name,)
-    ).fetchone()
-
-    if player is None:
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO players
-            (name, score, items)
-            VALUES (?, 0, 0)
-            """,
-            (name,)
-        )
-
-        conn.commit()
-
-        player = conn.execute(
-            """
-            SELECT score, items
-            FROM players
-            WHERE name = ?
-            """,
-            (name,)
-        ).fetchone()
+    """, (player,)).fetchone()
 
     conn.close()
 
     # ==================================
-    # CREATE RANDOM ORDER FOR NEW ROUND
+    # CREATE RANDOM ROUND
     # ==================================
 
     round_questions = session.get("round_questions")
 
     if not round_questions:
-        question_ids = [q["id"] for q in QUESTIONS]
+
+        all_ids = [q["id"] for q in QUESTIONS]
 
         # If there are more than 100 questions,
-        # choose 100 randomly.
-        if len(question_ids) > QUESTIONS_PER_ROUND:
-            question_ids = random.sample(
-                question_ids,
+        # randomly choose 100.
+        if len(all_ids) > QUESTIONS_PER_ROUND:
+            round_questions = random.sample(
+                all_ids,
                 QUESTIONS_PER_ROUND
             )
-        else:
-            # Currently there are exactly 100,
-            # so shuffle all 100.
-            random.shuffle(question_ids)
 
-        session["round_questions"] = question_ids
-        round_questions = question_ids
+        # If there are exactly 100 questions,
+        # shuffle all 100.
+        else:
+            round_questions = all_ids[:]
+            random.shuffle(round_questions)
+
+        session["round_questions"] = round_questions
 
     # ==================================
-    # FIND NEXT RANDOM QUESTION
+    # FIND NEXT QUESTION
     # ==================================
 
     available_ids = [
@@ -323,39 +244,57 @@ def quiz():
         if question_id not in answered_ids
     ]
 
+    # ==================================
+    # QUIZ FINISHED
+    # ==================================
+
     if not available_ids:
+
+        session.pop("round_questions", None)
+        session.pop("current_question", None)
+
         return render_template(
             "quiz.html",
-            question=None,
-            completed=True,
-            feedback=False,
-            score=player["score"],
-            items=player["items"],
-            username=name
+            finished=True,
+            score=player_data["score"],
+            correct=player_data["items"],
+            total=QUESTIONS_PER_ROUND
         )
+
+    # ==================================
+    # GET NEXT RANDOM QUESTION
+    # ==================================
 
     next_id = available_ids[0]
 
-    question = None
+    question = next(
+        q for q in QUESTIONS
+        if q["id"] == next_id
+    )
 
-    for q in QUESTIONS:
-        if q["id"] == next_id:
-            question = q
-            break
-
-    if question is None:
-        return redirect("/SmartTrash")
-
+    # Save current question
     session["current_question"] = question["id"]
+
+    # ==================================
+    # CALCULATE DISPLAY NUMBER
+    # ==================================
+
+    answered_in_round = len(answered_ids)
+
+    question_number = answered_in_round + 1
+
+    # Make sure it doesn't exceed round size
+    if question_number > len(round_questions):
+        question_number = len(round_questions)
 
     return render_template(
         "quiz.html",
         question=question,
-        completed=False,
-        feedback=False,
-        score=player["score"],
-        items=player["items"],
-        username=name
+        question_number=question_number,
+        total_questions=len(round_questions),
+        score=player_data["score"],
+        correct=player_data["items"],
+        finished=False
     )
 
 
@@ -365,118 +304,96 @@ def quiz():
 
 @app.route("/answer", methods=["POST"])
 def answer():
-    if "username" not in session:
-        return redirect("/")
+    player = session.get("player")
 
-    name = session["username"]
+    if not player:
+        return redirect("/")
 
     question_id = session.get("current_question")
 
     if question_id is None:
-        return redirect("/SmartTrash")
-
-    question = None
-
-    for q in QUESTIONS:
-        if q["id"] == question_id:
-            question = q
-            break
-
-    if question is None:
-        session.pop("current_question", None)
-        return redirect("/SmartTrash")
+        return redirect("/quiz")
 
     selected_answer = request.form.get("answer")
+
+    question = next(
+        (
+            q for q in QUESTIONS
+            if q["id"] == question_id
+        ),
+        None
+    )
+
+    if question is None:
+        return redirect("/quiz")
+
+    conn = get_db()
+
+    # Prevent answering the same question twice
+    already_answered = conn.execute("""
+        SELECT 1
+        FROM answered_questions
+        WHERE player_name = ?
+        AND question_id = ?
+    """, (player, question_id)).fetchone()
+
+    if already_answered:
+        conn.close()
+        return redirect("/quiz")
+
     correct_answer = question["answer"]
 
     is_correct = selected_answer == correct_answer
 
-    conn = get_db()
-
-    already_answered = conn.execute(
-        """
-        SELECT id
-        FROM answered_questions
-        WHERE player_name = ?
-        AND question_id = ?
-        """,
-        (name, question_id)
-    ).fetchone()
-
-    if already_answered is not None:
-        conn.close()
-        session.pop("current_question", None)
-        return redirect("/SmartTrash")
-
     if is_correct:
-        conn.execute(
-            """
+
+        conn.execute("""
             UPDATE players
             SET score = score + 10,
                 items = items + 1
             WHERE name = ?
-            """,
-            (name,)
-        )
+        """, (player,))
 
-    conn.execute(
-        """
+    conn.execute("""
         INSERT INTO answered_questions
         (player_name, question_id)
         VALUES (?, ?)
-        """,
-        (name, question_id)
-    )
+    """, (player, question_id))
 
     conn.commit()
 
-    player = conn.execute(
-        """
+    player_data = conn.execute("""
         SELECT score, items
         FROM players
         WHERE name = ?
-        """,
-        (name,)
-    ).fetchone()
-
-    answered_count = conn.execute(
-        """
-        SELECT COUNT(*)
-        FROM answered_questions
-        WHERE player_name = ?
-        """,
-        (name,)
-    ).fetchone()[0]
+    """, (player,)).fetchone()
 
     conn.close()
 
-    session.pop("current_question", None)
+    # ==================================
+    # FIND CURRENT ROUND POSITION
+    # ==================================
 
-    if answered_count >= QUESTIONS_PER_ROUND:
-        return render_template(
-            "quiz.html",
-            question=question,
-            completed=True,
-            feedback=True,
-            is_correct=is_correct,
-            selected_answer=selected_answer,
-            correct_answer=correct_answer,
-            score=player["score"],
-            items=player["items"],
-            username=name
+    round_questions = session.get("round_questions", [])
+
+    try:
+        question_number = (
+            round_questions.index(question_id) + 1
         )
+    except ValueError:
+        question_number = 1
 
     return render_template(
         "quiz.html",
         question=question,
-        completed=False,
-        feedback=True,
-        is_correct=is_correct,
         selected_answer=selected_answer,
-        correct_answer=correct_answer,
-        score=player["score"],
-        items=player["items"],
-        username=name
+        is_correct=is_correct,
+        answered=True,
+        question_number=question_number,
+        total_questions=len(round_questions),
+        score=player_data["score"],
+        correct=player_data["items"],
+        finished=False
     )
 
 
@@ -488,34 +405,22 @@ def answer():
 def leaderboard():
     conn = get_db()
 
-    rows = conn.execute(
-        """
+    players = conn.execute("""
         SELECT name, score, items
         FROM players
-        ORDER BY score DESC, items DESC
-        LIMIT 100
-        """
-    ).fetchall()
+        ORDER BY score DESC
+    """).fetchall()
 
     conn.close()
 
-    leaderboard_data = []
-
-    for row in rows:
-        leaderboard_data.append({
-            "name": row["name"],
-            "score": row["score"],
-            "items": row["items"]
-        })
-
     return render_template(
-        "leaderboard.html",
-        leaderboard=leaderboard_data
+        "index.html",
+        players=players
     )
 
 
 # =========================
-# START SERVER
+# RUN SERVER
 # =========================
 
 if __name__ == "__main__":
