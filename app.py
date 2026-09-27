@@ -12,6 +12,10 @@ QUESTIONS = get_questions()
 QUESTIONS_PER_ROUND = 100
 
 
+# =========================
+# DATABASE
+# =========================
+
 def get_db():
     conn = sqlite3.connect("smarttrash.db")
     conn.row_factory = sqlite3.Row
@@ -51,19 +55,23 @@ init_db()
 
 @app.route("/")
 def index():
+
+    username = session.get("player")
+
     conn = get_db()
 
     players = conn.execute("""
         SELECT name, score, items
         FROM players
-        ORDER BY score DESC
+        ORDER BY score DESC, name ASC
     """).fetchall()
 
     conn.close()
 
     return render_template(
         "index.html",
-        players=players
+        players=players,
+        username=username
     )
 
 
@@ -73,12 +81,14 @@ def index():
 
 @app.route("/set_name", methods=["POST"])
 def set_name():
+
     name = request.form.get("name", "").strip()
 
     if not name:
         return redirect("/")
 
-    session["player"] = name
+    # Limit name length
+    name = name[:20]
 
     conn = get_db()
 
@@ -87,53 +97,99 @@ def set_name():
         (name,)
     ).fetchone()
 
+    # Create new player if needed
     if not player:
-        conn.execute(
-            "INSERT INTO players (name, score, items) VALUES (?, 0, 0)",
-            (name,)
-        )
+
+        conn.execute("""
+            INSERT INTO players
+            (name, score, items)
+            VALUES (?, 0, 0)
+        """, (name,))
+
         conn.commit()
 
     conn.close()
 
-    return redirect("/")
+    # Set current player
+    session["player"] = name
+
+    # Remove previous quiz session
+    session.pop("round_questions", None)
+    session.pop("current_question", None)
+
+    # Start a fresh quiz
+    return redirect("/start_quiz")
 
 
 # =========================
-# CHANGE NAME
+# CHANGE / SWITCH NAME
 # =========================
 
 @app.route("/change_name", methods=["POST"])
 def change_name():
-    old_name = session.get("player")
+
     new_name = request.form.get("name", "").strip()
 
-    if not old_name or not new_name:
+    if not new_name:
         return redirect("/")
+
+    new_name = new_name[:20]
 
     conn = get_db()
 
-    existing = conn.execute(
-        "SELECT * FROM players WHERE name = ?",
-        (new_name,)
-    ).fetchone()
+    # Check whether this name already exists
+    existing = conn.execute("""
+        SELECT *
+        FROM players
+        WHERE name = ?
+    """, (new_name,)).fetchone()
 
-    if not existing:
-        conn.execute(
-            "UPDATE players SET name = ? WHERE name = ?",
-            (new_name, old_name)
-        )
+    conn.close()
 
-        conn.execute(
-            "UPDATE answered_questions SET player_name = ? WHERE player_name = ?",
-            (new_name, old_name)
-        )
-
-        conn.commit()
+    # If the player already exists,
+    # simply switch to that player.
+    if existing:
 
         session["player"] = new_name
 
+        session.pop("round_questions", None)
+        session.pop("current_question", None)
+
+        return redirect("/start_quiz")
+
+    # Otherwise create a new player
+    conn = get_db()
+
+    conn.execute("""
+        INSERT INTO players
+        (name, score, items)
+        VALUES (?, 0, 0)
+    """, (new_name,))
+
+    conn.commit()
     conn.close()
+
+    session["player"] = new_name
+
+    session.pop("round_questions", None)
+    session.pop("current_question", None)
+
+    return redirect("/start_quiz")
+
+
+# =========================
+# SWITCH PLAYER
+# =========================
+
+@app.route("/switch_player")
+def switch_player():
+
+    # Clear current player
+    session.pop("player", None)
+
+    # Clear quiz session
+    session.pop("round_questions", None)
+    session.pop("current_question", None)
 
     return redirect("/")
 
@@ -144,6 +200,7 @@ def change_name():
 
 @app.route("/start_quiz")
 def start_quiz():
+
     player = session.get("player")
 
     if not player:
@@ -151,7 +208,7 @@ def start_quiz():
 
     conn = get_db()
 
-    # Reset score
+    # Reset THIS player's score
     conn.execute("""
         UPDATE players
         SET score = 0,
@@ -159,7 +216,7 @@ def start_quiz():
         WHERE name = ?
     """, (player,))
 
-    # Remove old answered questions
+    # Reset THIS player's answered questions
     conn.execute("""
         DELETE FROM answered_questions
         WHERE player_name = ?
@@ -168,7 +225,7 @@ def start_quiz():
     conn.commit()
     conn.close()
 
-    # Clear old round
+    # Remove old random round
     session.pop("round_questions", None)
     session.pop("current_question", None)
 
@@ -182,6 +239,7 @@ def start_quiz():
 @app.route("/SmartTrash")
 @app.route("/quiz")
 def quiz():
+
     player = session.get("player")
 
     if not player:
@@ -189,6 +247,7 @@ def quiz():
 
     conn = get_db()
 
+    # Get answered questions
     answered_rows = conn.execute("""
         SELECT question_id
         FROM answered_questions
@@ -200,6 +259,7 @@ def quiz():
         for row in answered_rows
     }
 
+    # Get player information
     player_data = conn.execute("""
         SELECT score, items
         FROM players
@@ -208,9 +268,14 @@ def quiz():
 
     conn.close()
 
-    # ==================================
+    if not player_data:
+        session.pop("player", None)
+        return redirect("/")
+
+
+    # =========================
     # CREATE RANDOM ROUND
-    # ==================================
+    # =========================
 
     round_questions = session.get("round_questions")
 
@@ -218,25 +283,27 @@ def quiz():
 
         all_ids = [q["id"] for q in QUESTIONS]
 
-        # If there are more than 100 questions,
-        # randomly choose 100.
+        # More than 100 questions
         if len(all_ids) > QUESTIONS_PER_ROUND:
+
             round_questions = random.sample(
                 all_ids,
                 QUESTIONS_PER_ROUND
             )
 
-        # If there are exactly 100 questions,
-        # shuffle all 100.
+        # Exactly 100 or fewer
         else:
+
             round_questions = all_ids[:]
+
             random.shuffle(round_questions)
 
         session["round_questions"] = round_questions
 
-    # ==================================
+
+    # =========================
     # FIND NEXT QUESTION
-    # ==================================
+    # =========================
 
     available_ids = [
         question_id
@@ -244,11 +311,14 @@ def quiz():
         if question_id not in answered_ids
     ]
 
-    # ==================================
+
+    # =========================
     # QUIZ FINISHED
-    # ==================================
+    # =========================
 
     if not available_ids:
+
+        total_questions = len(round_questions)
 
         session.pop("round_questions", None)
         session.pop("current_question", None)
@@ -258,12 +328,13 @@ def quiz():
             finished=True,
             score=player_data["score"],
             correct=player_data["items"],
-            total=QUESTIONS_PER_ROUND
+            total=total_questions
         )
 
-    # ==================================
-    # GET NEXT RANDOM QUESTION
-    # ==================================
+
+    # =========================
+    # GET NEXT QUESTION
+    # =========================
 
     next_id = available_ids[0]
 
@@ -272,28 +343,33 @@ def quiz():
         if q["id"] == next_id
     )
 
-    # Save current question
     session["current_question"] = question["id"]
 
-    # ==================================
-    # CALCULATE DISPLAY NUMBER
-    # ==================================
 
-    answered_in_round = len(answered_ids)
+    # =========================
+    # DISPLAY NUMBER
+    # =========================
 
-    question_number = answered_in_round + 1
+    question_number = (
+        len(round_questions) - len(available_ids) + 1
+    )
 
-    # Make sure it doesn't exceed round size
-    if question_number > len(round_questions):
-        question_number = len(round_questions)
+    total_questions = len(round_questions)
+
 
     return render_template(
         "quiz.html",
+
         question=question,
+
         question_number=question_number,
-        total_questions=len(round_questions),
+
+        total_questions=total_questions,
+
         score=player_data["score"],
+
         correct=player_data["items"],
+
         finished=False
     )
 
@@ -304,6 +380,7 @@ def quiz():
 
 @app.route("/answer", methods=["POST"])
 def answer():
+
     player = session.get("player")
 
     if not player:
@@ -327,9 +404,14 @@ def answer():
     if question is None:
         return redirect("/quiz")
 
+
     conn = get_db()
 
-    # Prevent answering the same question twice
+
+    # =========================
+    # PREVENT DOUBLE ANSWER
+    # =========================
+
     already_answered = conn.execute("""
         SELECT 1
         FROM answered_questions
@@ -337,13 +419,28 @@ def answer():
         AND question_id = ?
     """, (player, question_id)).fetchone()
 
+
     if already_answered:
+
         conn.close()
+
         return redirect("/quiz")
+
+
+    # =========================
+    # CHECK ANSWER
+    # =========================
 
     correct_answer = question["answer"]
 
-    is_correct = selected_answer == correct_answer
+    is_correct = (
+        selected_answer == correct_answer
+    )
+
+
+    # =========================
+    # UPDATE SCORE
+    # =========================
 
     if is_correct:
 
@@ -354,13 +451,24 @@ def answer():
             WHERE name = ?
         """, (player,))
 
+
+    # =========================
+    # SAVE ANSWERED QUESTION
+    # =========================
+
     conn.execute("""
         INSERT INTO answered_questions
         (player_name, question_id)
         VALUES (?, ?)
     """, (player, question_id))
 
+
     conn.commit()
+
+
+    # =========================
+    # GET UPDATED PLAYER DATA
+    # =========================
 
     player_data = conn.execute("""
         SELECT score, items
@@ -370,29 +478,46 @@ def answer():
 
     conn.close()
 
-    # ==================================
-    # FIND CURRENT ROUND POSITION
-    # ==================================
 
-    round_questions = session.get("round_questions", [])
+    # =========================
+    # QUESTION NUMBER
+    # =========================
+
+    round_questions = session.get(
+        "round_questions",
+        []
+    )
 
     try:
+
         question_number = (
             round_questions.index(question_id) + 1
         )
+
     except ValueError:
+
         question_number = 1
+
 
     return render_template(
         "quiz.html",
+
         question=question,
+
         selected_answer=selected_answer,
+
         is_correct=is_correct,
+
         answered=True,
+
         question_number=question_number,
+
         total_questions=len(round_questions),
+
         score=player_data["score"],
+
         correct=player_data["items"],
+
         finished=False
     )
 
@@ -403,19 +528,21 @@ def answer():
 
 @app.route("/leaderboard")
 def leaderboard():
+
     conn = get_db()
 
     players = conn.execute("""
         SELECT name, score, items
         FROM players
-        ORDER BY score DESC
+        ORDER BY score DESC, name ASC
     """).fetchall()
 
     conn.close()
 
     return render_template(
         "index.html",
-        players=players
+        players=players,
+        username=session.get("player")
     )
 
 
@@ -424,6 +551,7 @@ def leaderboard():
 # =========================
 
 if __name__ == "__main__":
+
     app.run(
         debug=False,
         host="0.0.0.0",
