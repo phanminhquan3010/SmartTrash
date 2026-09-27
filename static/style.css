@@ -273,3 +273,58 @@ h2 {
         font-size: 14px;
     }
 }
+/* ========================= */
+/* SMART TRASH QUIZ */
+/* ========================= */
+
+.quiz-option {
+    display: block;
+    width: 100%;
+    margin: 12px 0;
+    padding: 15px 18px;
+
+    border: 2px solid #4caf50;
+    border-radius: 12px;
+
+    background: #f1f8e9;
+    color: #245c2a;
+
+    font-size: 17px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.quiz-option:hover {
+    background: #c8e6c9;
+    transform: translateY(-2px);
+}
+
+
+.correct-box {
+    padding: 18px;
+    margin-top: 15px;
+
+    border-radius: 14px;
+
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+
+    color: #2e7d32;
+}
+
+
+.wrong-box {
+    padding: 18px;
+    margin-top: 15px;
+
+    border-radius: 14px;
+
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+
+    color: #e65100;
+}
