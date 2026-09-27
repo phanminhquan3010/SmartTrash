@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect
 import sqlite3
 import os
+import random
 from questions import get_questions
 
 app = Flask(__name__)
@@ -117,6 +118,7 @@ def set_name():
             """,
             (name,)
         )
+
         conn.commit()
 
     conn.close()
@@ -220,6 +222,8 @@ def start_quiz():
     conn.commit()
     conn.close()
 
+    # Clear the old random order
+    session.pop("round_questions", None)
     session.pop("current_question", None)
 
     return redirect("/SmartTrash")
@@ -228,10 +232,6 @@ def start_quiz():
 # =========================
 # QUIZ
 # =========================
-
-# BOTH URLs work:
-# /SmartTrash
-# /quiz
 
 @app.route("/SmartTrash")
 @app.route("/quiz")
@@ -289,12 +289,41 @@ def quiz():
 
     conn.close()
 
-    available = [
-        q for q in QUESTIONS
-        if q["id"] not in answered_ids
+    # ==================================
+    # CREATE RANDOM ORDER FOR NEW ROUND
+    # ==================================
+
+    round_questions = session.get("round_questions")
+
+    if not round_questions:
+        question_ids = [q["id"] for q in QUESTIONS]
+
+        # If there are more than 100 questions,
+        # choose 100 randomly.
+        if len(question_ids) > QUESTIONS_PER_ROUND:
+            question_ids = random.sample(
+                question_ids,
+                QUESTIONS_PER_ROUND
+            )
+        else:
+            # Currently there are exactly 100,
+            # so shuffle all 100.
+            random.shuffle(question_ids)
+
+        session["round_questions"] = question_ids
+        round_questions = question_ids
+
+    # ==================================
+    # FIND NEXT RANDOM QUESTION
+    # ==================================
+
+    available_ids = [
+        question_id
+        for question_id in round_questions
+        if question_id not in answered_ids
     ]
 
-    if not available:
+    if not available_ids:
         return render_template(
             "quiz.html",
             question=None,
@@ -305,10 +334,17 @@ def quiz():
             username=name
         )
 
-    question = min(
-        available,
-        key=lambda q: q["id"]
-    )
+    next_id = available_ids[0]
+
+    question = None
+
+    for q in QUESTIONS:
+        if q["id"] == next_id:
+            question = q
+            break
+
+    if question is None:
+        return redirect("/SmartTrash")
 
     session["current_question"] = question["id"]
 
