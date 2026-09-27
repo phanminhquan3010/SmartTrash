@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, redirect
 import sqlite3
+import os
 from questions import get_questions
 
 app = Flask(__name__)
@@ -44,7 +45,6 @@ def setup_database():
     conn.close()
 
 
-# IMPORTANT FOR RENDER
 setup_database()
 
 
@@ -117,7 +117,6 @@ def set_name():
             """,
             (name,)
         )
-
         conn.commit()
 
     conn.close()
@@ -230,7 +229,12 @@ def start_quiz():
 # QUIZ
 # =========================
 
+# BOTH URLs work:
+# /SmartTrash
+# /quiz
+
 @app.route("/SmartTrash")
+@app.route("/quiz")
 def quiz():
     if "username" not in session:
         return redirect("/")
@@ -480,7 +484,7 @@ def leaderboard():
 
 if __name__ == "__main__":
     app.run(
-        debug=True,
-        host="127.0.0.1",
-        port=5000
+        debug=False,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
     )
