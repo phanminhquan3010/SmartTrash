@@ -12,11 +12,9 @@
 
     <title>Phân loại nhanh · Smart Trash</title>
 
-
-    <!-- CSS -->
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}?v=5"
+        href="{{ url_for('static', filename='style.css') }}?v=6"
     >
 
 </head>
@@ -51,13 +49,11 @@
 
 
     <!-- ================================================= -->
-    <!-- PLAYER STATS -->
+    <!-- STATS -->
     <!-- ================================================= -->
 
     <div class="quick-stats">
 
-
-        <!-- PLAYER -->
 
         <div class="quick-player">
 
@@ -81,8 +77,6 @@
 
 
 
-        <!-- SCORE -->
-
         <div class="quick-stat">
 
             <span>
@@ -104,8 +98,6 @@
         </div>
 
 
-
-        <!-- CORRECT -->
 
         <div class="quick-stat">
 
@@ -164,9 +156,7 @@
 
                 <div>
 
-                    <span>
-                        🌱
-                    </span>
+                    <span>🌱</span>
 
                     <strong>
                         {{ score }}
@@ -182,9 +172,7 @@
 
                 <div>
 
-                    <span>
-                        ✅
-                    </span>
+                    <span>✅</span>
 
                     <strong>
                         {{ correct }}
@@ -200,9 +188,7 @@
 
                 <div>
 
-                    <span>
-                        📊
-                    </span>
+                    <span>📊</span>
 
                     <strong>
                         {{ total }}
@@ -255,7 +241,6 @@
         <div class="quick-game-card">
 
 
-
             <!-- ================================================= -->
             <!-- TIMER -->
             <!-- ================================================= -->
@@ -285,12 +270,10 @@
 
                     <div class="quick-timer-track">
 
-
                         <div
                             class="quick-timer-bar"
                             id="timer-bar"
                         ></div>
-
 
                     </div>
 
@@ -315,7 +298,7 @@
 
 
             <!-- ================================================= -->
-            <!-- TRASH ITEM -->
+            <!-- ITEM -->
             <!-- ================================================= -->
 
             <div class="quick-trash-card">
@@ -335,19 +318,23 @@
 
                 <div class="quick-trash-hint">
 
+
                     {% if answered and timed_out %}
 
                         ⏰ Bạn đã hết thời gian!
 
+
                     {% elif answered %}
 
                         Chuẩn bị cho câu tiếp theo... ⚡
+
 
                     {% else %}
 
                         Chọn loại rác phù hợp bên dưới
 
                     {% endif %}
+
 
                 </div>
 
@@ -371,14 +358,34 @@
                 >
 
 
+                    <!--
+                        IMPORTANT:
 
+                        JavaScript writes the selected answer
+                        into THIS hidden input BEFORE the
+                        buttons are disabled.
+
+                        Flask will therefore always receive
+                        recycle / organic / dangerous.
+                    -->
+
+                    <input
+                        type="hidden"
+                        name="answer"
+                        id="selected-answer"
+                        value=""
+                    >
+
+
+
+                    <!-- ============================= -->
                     <!-- RECYCLE -->
+                    <!-- ============================= -->
 
                     <button
                         class="quick-option recycle-option"
-                        type="submit"
-                        name="answer"
-                        value="recycle"
+                        type="button"
+                        data-answer="recycle"
                     >
 
                         <span class="option-icon">
@@ -397,13 +404,14 @@
 
 
 
+                    <!-- ============================= -->
                     <!-- ORGANIC -->
+                    <!-- ============================= -->
 
                     <button
                         class="quick-option organic-option"
-                        type="submit"
-                        name="answer"
-                        value="organic"
+                        type="button"
+                        data-answer="organic"
                     >
 
                         <span class="option-icon">
@@ -422,13 +430,14 @@
 
 
 
+                    <!-- ============================= -->
                     <!-- DANGEROUS -->
+                    <!-- ============================= -->
 
                     <button
                         class="quick-option dangerous-option"
-                        type="submit"
-                        name="answer"
-                        value="dangerous"
+                        type="button"
+                        data-answer="dangerous"
                     >
 
                         <span class="option-icon">
@@ -451,7 +460,7 @@
 
 
                 <!-- ================================================= -->
-                <!-- HIDDEN TIMEOUT FORM -->
+                <!-- TIMEOUT FORM -->
                 <!-- ================================================= -->
 
                 <form
@@ -473,7 +482,7 @@
 
 
                 <!-- ================================================= -->
-                <!-- TIMEOUT -->
+                <!-- TIMEOUT RESULT -->
                 <!-- ================================================= -->
 
                 {% if timed_out %}
@@ -505,7 +514,7 @@
 
 
                 <!-- ================================================= -->
-                <!-- CORRECT -->
+                <!-- CORRECT RESULT -->
                 <!-- ================================================= -->
 
                 {% elif is_correct %}
@@ -537,7 +546,7 @@
 
 
                 <!-- ================================================= -->
-                <!-- WRONG -->
+                <!-- WRONG RESULT -->
                 <!-- ================================================= -->
 
                 {% else %}
@@ -572,7 +581,7 @@
 
 
                 <!-- ================================================= -->
-                <!-- AUTO NEXT MESSAGE -->
+                <!-- AUTO NEXT TEXT -->
                 <!-- ================================================= -->
 
                 <div
@@ -630,7 +639,7 @@
 
 
 <!-- ===================================================== -->
-<!-- TIMER JAVASCRIPT -->
+<!-- TIMER + ANSWER JAVASCRIPT -->
 <!-- ===================================================== -->
 
 {% if not finished and not answered %}
@@ -639,9 +648,9 @@
 <script>
 
 
-    /* =====================================================
-       SETTINGS
-       ===================================================== */
+    // =====================================================
+    // SETTINGS
+    // =====================================================
 
     const TIMER_DURATION = 10;
 
@@ -653,9 +662,9 @@
 
 
 
-    /* =====================================================
-       ELEMENTS
-       ===================================================== */
+    // =====================================================
+    // ELEMENTS
+    // =====================================================
 
     const timerText =
         document.getElementById(
@@ -681,6 +690,12 @@
         );
 
 
+    const selectedAnswerInput =
+        document.getElementById(
+            "selected-answer"
+        );
+
+
     const answerButtons =
         document.querySelectorAll(
             ".quick-option"
@@ -688,14 +703,15 @@
 
 
 
-    /* =====================================================
-       DISABLE BUTTONS
-       ===================================================== */
+    // =====================================================
+    // DISABLE ANSWERS
+    // =====================================================
 
     function disableAnswers() {
 
 
         answerButtons.forEach(
+
             function (button) {
 
 
@@ -711,6 +727,7 @@
 
 
             }
+
         );
 
 
@@ -718,12 +735,88 @@
 
 
 
-    /* =====================================================
-       START TIMER
-       ===================================================== */
+    // =====================================================
+    // ANSWER CLICK
+    // =====================================================
+
+    answerButtons.forEach(
+
+        function (button) {
+
+
+            button.addEventListener(
+
+                "click",
+
+                function () {
+
+
+                    // Already answered / timed out
+
+                    if (questionLocked) {
+
+                        return;
+
+                    }
+
+
+
+                    // Lock immediately
+
+                    questionLocked = true;
+
+
+
+                    // STOP TIMER
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+
+                    // =================================================
+                    // SAVE ANSWER BEFORE DISABLING BUTTONS
+                    // =================================================
+
+                    const answer =
+                        button.dataset.answer;
+
+
+                    selectedAnswerInput.value =
+                        answer;
+
+
+
+                    // NOW it is safe to disable everything
+
+                    disableAnswers();
+
+
+
+                    // Submit form AFTER answer was stored
+
+                    answerForm.submit();
+
+
+                }
+
+            );
+
+
+        }
+
+    );
+
+
+
+    // =====================================================
+    // TIMER
+    // =====================================================
 
     const timerInterval =
         setInterval(
+
             function () {
 
 
@@ -747,9 +840,9 @@
 
 
 
-                /* =========================================
-                   UPDATE NUMBER
-                   ========================================= */
+                // =================================================
+                // TIMER TEXT
+                // =================================================
 
                 timerText.textContent =
 
@@ -759,9 +852,9 @@
 
 
 
-                /* =========================================
-                   UPDATE BAR
-                   ========================================= */
+                // =================================================
+                // TIMER BAR
+                // =================================================
 
                 const percentage =
 
@@ -782,9 +875,9 @@
 
 
 
-                /* =========================================
-                   GREEN
-                   ========================================= */
+                // =================================================
+                // GREEN
+                // =================================================
 
                 if (timeLeft > 5) {
 
@@ -813,9 +906,9 @@
 
 
 
-                /* =========================================
-                   YELLOW
-                   ========================================= */
+                // =================================================
+                // YELLOW
+                // =================================================
 
                 else if (timeLeft > 3) {
 
@@ -844,9 +937,9 @@
 
 
 
-                /* =========================================
-                   RED
-                   ========================================= */
+                // =================================================
+                // RED
+                // =================================================
 
                 else {
 
@@ -875,9 +968,9 @@
 
 
 
-                /* =========================================
-                   TIME OUT
-                   ========================================= */
+                // =================================================
+                // TIMEOUT
+                // =================================================
 
                 if (timeLeft <= 0) {
 
@@ -902,14 +995,10 @@
 
 
 
-                    /*
-                        Submit the hidden timeout form.
-
-                        Flask will now count this
-                        question as attempted/wrong.
-                    */
+                    // Send timeout to Flask
 
                     setTimeout(
+
                         function () {
 
 
@@ -917,7 +1006,9 @@
 
 
                         },
+
                         250
+
                     );
 
 
@@ -927,62 +1018,8 @@
             },
 
             100
+
         );
-
-
-
-    /* =====================================================
-       PLAYER ANSWERS BEFORE TIMEOUT
-       ===================================================== */
-
-    if (answerForm) {
-
-
-        answerForm.addEventListener(
-            "submit",
-            function (event) {
-
-
-                /*
-                    If timeout already happened,
-                    DO NOT allow another answer.
-                */
-
-                if (questionLocked) {
-
-
-                    event.preventDefault();
-
-
-                    return;
-
-
-                }
-
-
-
-                /*
-                    Lock immediately.
-
-                    This prevents double-clicking.
-                */
-
-                questionLocked = true;
-
-
-                clearInterval(
-                    timerInterval
-                );
-
-
-                disableAnswers();
-
-
-            }
-        );
-
-
-    }
 
 
 </script>
@@ -993,7 +1030,7 @@
 
 
 <!-- ===================================================== -->
-<!-- AUTO NEXT JAVASCRIPT -->
+<!-- AUTO NEXT -->
 <!-- ===================================================== -->
 
 {% if not finished and answered %}
@@ -1002,12 +1039,8 @@
 <script>
 
 
-    /*
-        Show result briefly,
-        then automatically continue.
-    */
-
     setTimeout(
+
         function () {
 
 
@@ -1018,6 +1051,7 @@
         },
 
         1200
+
     );
 
 
