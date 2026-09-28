@@ -13,8 +13,133 @@
 
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}?v=7"
+        href="{{ url_for('static', filename='style.css') }}?v=8"
     >
+
+    <style>
+        .quick-streak-stat strong { color: #ff7a00; }
+        .quick-best-stat strong { color: #c99000; }
+
+        .streak-display {
+            margin: 14px 0 4px;
+            padding: 12px 18px;
+            border-radius: 16px;
+            background: #fff6e8;
+            border: 2px solid #ffb347;
+            text-align: center;
+            animation: streakPop .35s ease;
+        }
+
+        .streak-number {
+            font-size: 26px;
+            font-weight: 900;
+            color: #ff7300;
+        }
+
+        .streak-label {
+            display: block;
+            margin-top: 2px;
+            font-size: 11px;
+            font-weight: 900;
+            color: #a65b00;
+            letter-spacing: 1px;
+        }
+
+        .new-best {
+            margin-top: 10px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            background: #fff8d8;
+            border: 2px solid #ffd54f;
+            color: #8c6800;
+            font-weight: 900;
+            text-align: center;
+            animation: streakPop .45s ease;
+        }
+
+        .streak-lost {
+            margin-top: 8px;
+            color: #d94a4a;
+            font-weight: 900;
+        }
+
+        @keyframes streakPop {
+            0% { transform: scale(.72); }
+            70% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .quick-leaderboard {
+            margin-top: 28px;
+            padding: 22px;
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.08);
+        }
+
+        .quick-leaderboard h2 {
+            margin: 0 0 6px;
+            text-align: center;
+            color: #1d6d42;
+        }
+
+        .quick-leaderboard-subtitle {
+            margin: 0 0 16px;
+            text-align: center;
+            color: #718276;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .quick-rank-row {
+            display: grid;
+            grid-template-columns: 55px 1fr 105px;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 10px;
+            border-bottom: 1px solid #edf1ee;
+        }
+
+        .quick-rank-row:last-child { border-bottom: none; }
+
+        .quick-rank-number {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .quick-rank-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #31463a;
+            font-weight: 800;
+        }
+
+        .quick-rank-score {
+            text-align: right;
+            color: #ff7300;
+            font-weight: 900;
+        }
+
+        .quick-current-player {
+            background: #effcf4;
+            border-radius: 12px;
+        }
+
+        .quick-no-records {
+            padding: 16px;
+            text-align: center;
+            color: #718276;
+        }
+
+        @media (max-width: 650px) {
+            .quick-rank-row {
+                grid-template-columns: 45px 1fr 82px;
+            }
+        }
+    </style>
+
 </head>
 
 
@@ -48,40 +173,35 @@
     <div class="quick-stats">
 
         <div class="quick-player">
-
-            <span class="quick-player-icon">
-                👋
-            </span>
-
+            <span class="quick-player-icon">👋</span>
             <div>
                 <small>NGƯỜI CHƠI</small>
                 <strong>{{ username }}</strong>
             </div>
-
         </div>
 
-
         <div class="quick-stat">
-
             <span>🌱</span>
-
             <div>
                 <small>ĐIỂM</small>
                 <strong>{{ score }}</strong>
             </div>
-
         </div>
 
-
-        <div class="quick-stat">
-
-            <span>✅</span>
-
+        <div class="quick-stat quick-streak-stat">
+            <span>🔥</span>
             <div>
-                <small>ĐÚNG</small>
-                <strong>{{ correct }}</strong>
+                <small>STREAK</small>
+                <strong>{{ streak }}</strong>
             </div>
+        </div>
 
+        <div class="quick-stat quick-best-stat">
+            <span>👑</span>
+            <div>
+                <small>KỶ LỤC</small>
+                <strong>{{ best_streak }}</strong>
+            </div>
         </div>
 
     </div>
@@ -365,6 +485,10 @@
                         Nhanh hơn ở câu tiếp theo nhé! ⚡
                     </p>
 
+                    <div class="streak-lost">
+                        💔 STREAK ĐÃ BỊ RESET
+                    </div>
+
                 </div>
 
             </div>
@@ -388,6 +512,17 @@
                         Quá ngon bro! +10 🌱
                     </p>
 
+                    <div class="streak-display">
+                        <div class="streak-number">🔥 x{{ streak }}</div>
+                        <span class="streak-label">COMBO STREAK</span>
+                    </div>
+
+                    {% if new_best %}
+                    <div class="new-best">
+                        👑 NEW PERSONAL BEST!
+                    </div>
+                    {% endif %}
+
                 </div>
 
             </div>
@@ -410,6 +545,10 @@
                     <p>
                         Hãy nhớ phân loại rác đúng cách nhé!
                     </p>
+
+                    <div class="streak-lost">
+                        💔 STREAK ĐÃ BỊ RESET
+                    </div>
 
                 </div>
 
@@ -450,6 +589,61 @@
     </div>
 
     {% endif %}
+
+
+    <!-- ============================= -->
+    <!-- QUICK SORT LEADERBOARD -->
+    <!-- ============================= -->
+
+    <div class="quick-leaderboard">
+
+        <h2>🏆 QUICK SORT LEADERBOARD</h2>
+
+        <p class="quick-leaderboard-subtitle">
+            Xếp hạng theo Best Streak 🔥
+        </p>
+
+        {% if leaderboard %}
+
+            {% for player in leaderboard %}
+
+            <div class="quick-rank-row {% if player.name == username %}quick-current-player{% endif %}">
+
+                <div class="quick-rank-number">
+                    {% if loop.index == 1 %}
+                        🥇
+                    {% elif loop.index == 2 %}
+                        🥈
+                    {% elif loop.index == 3 %}
+                        🥉
+                    {% else %}
+                        #{{ loop.index }}
+                    {% endif %}
+                </div>
+
+                <div class="quick-rank-name">
+                    {{ player.name }}
+                    {% if player.name == username %}👈{% endif %}
+                </div>
+
+                <div class="quick-rank-score">
+                    🔥 {{ player.quick_best_streak }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="quick-no-records">
+                Chưa có kỷ lục nào 👀<br>
+                Hãy trở thành người đầu tiên!
+            </div>
+
+        {% endif %}
+
+    </div>
 
 
     <!-- ============================= -->
