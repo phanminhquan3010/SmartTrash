@@ -1062,22 +1062,27 @@ def quick_sort_answer():
         streak += 1
 
         if streak > best_streak:
-
     new_best = True
 
     conn = get_db()
 
     conn.execute("""
+        INSERT OR IGNORE INTO players
+        (name, score, items, quick_best_streak)
+        VALUES (?, 0, 0, 0)
+    """, (username,))
+
+    conn.execute("""
         UPDATE players
-        SET quick_best_streak =
-            MAX(COALESCE(quick_best_streak, 0), ?)
+        SET quick_best_streak = ?
         WHERE name = ?
-    """, (
-        streak,
-        username
-    ))
+    """, (streak, username))
 
     conn.commit()
+    conn.close()
+
+    # READ THE VALUE BACK FROM DATABASE
+    best_streak = get_quick_best_streak(username)
 
     saved_player = conn.execute("""
         SELECT quick_best_streak
