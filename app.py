@@ -1078,6 +1078,10 @@ def quick_sort_answer():
     session["quick_total"] = total
     session["quick_streak"] = streak
     session["quick_best_streak"] = best_streak
+print("🔥 ANSWER DEBUG")
+print("streak =", streak)
+print("best_streak =", best_streak)
+print("session best =", session.get("quick_best_streak"))
     session["quick_answered"] = True
 
     return render_template(
@@ -1152,7 +1156,9 @@ def quick_sort_timeout():
 @app.route("/quick_sort_next")
 def quick_sort_next():
     username = session.get("player")
-
+  print("⚡ NEXT DEBUG")
+    print("session streak =", session.get("quick_streak"))
+    print("session best =", session.get("quick_best_streak"))
     if not username:
         return redirect("/")
 
