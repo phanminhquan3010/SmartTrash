@@ -17,6 +17,39 @@
     >
 
     <style>
+        .quick-stats {
+    display: grid !important;
+
+    grid-template-columns:
+        minmax(220px, 2fr)
+        repeat(3, minmax(120px, 1fr)) !important;
+
+    gap: 12px !important;
+
+    width: 100% !important;
+}
+
+.quick-player,
+.quick-stat {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 0;
+}
+
+.quick-streak-stat,
+.quick-best-stat {
+    display: flex !important;
+}
+
+@media (max-width: 700px) {
+
+    .quick-stats {
+        grid-template-columns:
+            1fr 1fr !important;
+    }
+
+}
         .quick-streak-stat strong { color: #ff7a00; }
         .quick-best-stat strong { color: #c99000; }
 
