@@ -1362,3 +1362,195 @@ h2 {
 
     transform: scale(1.08);
 }
+/* =========================================================
+   ⏱️ SMART TRASH - QUICK SORT TIMER
+   ========================================================= */
+
+
+.quick-timer {
+
+    width: 100%;
+
+    margin-bottom: 25px;
+
+}
+
+
+
+/* =========================================================
+   TIMER INFO
+   ========================================================= */
+
+.quick-timer-info {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    width: 100%;
+
+    margin-bottom: 10px;
+
+    color: #08752f;
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.5px;
+
+}
+
+
+
+/* =========================================================
+   TIMER NUMBER
+   ========================================================= */
+
+#timer-text {
+
+    color: #08752f;
+
+    font-size: 20px;
+
+    font-weight: 900;
+
+    transition:
+
+        color 0.25s ease,
+
+        transform 0.25s ease;
+
+}
+
+
+
+/* =========================================================
+   TIMER TRACK
+   ========================================================= */
+
+.quick-timer-track {
+
+    display: block;
+
+    position: relative;
+
+    width: 100%;
+
+    height: 16px;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    background: #dcebe0;
+
+    border:
+
+        1px solid
+
+        #c2ddc8;
+
+    border-radius: 50px;
+
+    box-shadow:
+
+        inset
+
+        0
+
+        2px
+
+        5px
+
+        rgba(0, 0, 0, 0.08);
+
+}
+
+
+
+/* =========================================================
+   TIMER BAR
+   ========================================================= */
+
+.quick-timer-bar {
+
+    display: block;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-height: 16px;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #22c55e,
+            #16a344
+        );
+
+    border-radius: 50px;
+
+    transition:
+
+        width 0.1s linear,
+
+        background 0.25s ease;
+
+}
+
+
+
+/* =========================================================
+   🟡 WARNING
+   ========================================================= */
+
+.quick-timer-bar.timer-warning {
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #facc15,
+            #f59e0b
+        );
+
+}
+
+
+#timer-text.timer-warning-text {
+
+    color: #d68a00;
+
+}
+
+
+
+/* =========================================================
+   🔴 DANGER
+   ========================================================= */
+
+.quick-timer-bar.timer-danger {
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #ef4444,
+            #dc2626
+        );
+
+}
+
+
+#timer-text.timer-danger-text {
+
+    color: #dc2626;
+
+    transform: scale(1.08);
+
+}
