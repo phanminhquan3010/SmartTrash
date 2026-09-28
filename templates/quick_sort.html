@@ -14,10 +14,9 @@
 
 
     <!-- CSS -->
-    <!-- v=4 forces browser to load newest CSS -->
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}?v=4"
+        href="{{ url_for('static', filename='style.css') }}?v=5"
     >
 
 </head>
@@ -160,8 +159,6 @@
 
 
 
-            <!-- RESULTS -->
-
             <div class="quick-result-stats">
 
 
@@ -221,8 +218,6 @@
             </div>
 
 
-
-            <!-- FINISH BUTTONS -->
 
             <div class="quick-finish-buttons">
 
@@ -340,7 +335,19 @@
 
                 <div class="quick-trash-hint">
 
-                    Chọn loại rác phù hợp bên dưới
+                    {% if answered and timed_out %}
+
+                        ⏰ Bạn đã hết thời gian!
+
+                    {% elif answered %}
+
+                        Chuẩn bị cho câu tiếp theo... ⚡
+
+                    {% else %}
+
+                        Chọn loại rác phù hợp bên dưới
+
+                    {% endif %}
 
                 </div>
 
@@ -362,6 +369,7 @@
                     method="POST"
                     id="quick-answer-form"
                 >
+
 
 
                     <!-- RECYCLE -->
@@ -442,18 +450,66 @@
 
 
 
+                <!-- ================================================= -->
+                <!-- HIDDEN TIMEOUT FORM -->
+                <!-- ================================================= -->
+
+                <form
+                    action="/quick_sort_timeout"
+                    method="POST"
+                    id="quick-timeout-form"
+                    style="display: none;"
+                >
+                </form>
+
+
+
             <!-- ================================================= -->
-            <!-- ANSWER RESULT -->
+            <!-- RESULT -->
             <!-- ================================================= -->
 
             {% else %}
 
 
 
-                {% if is_correct %}
+                <!-- ================================================= -->
+                <!-- TIMEOUT -->
+                <!-- ================================================= -->
+
+                {% if timed_out %}
 
 
-                    <!-- CORRECT -->
+                    <div class="quick-answer-result quick-wrong">
+
+
+                        <div class="result-icon">
+                            ⏰
+                        </div>
+
+
+                        <div>
+
+                            <h2>
+                                HẾT GIỜ!
+                            </h2>
+
+                            <p>
+                                Nhanh hơn ở câu tiếp theo nhé! ⚡
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                <!-- ================================================= -->
+                <!-- CORRECT -->
+                <!-- ================================================= -->
+
+                {% elif is_correct %}
+
 
                     <div class="quick-answer-result quick-correct">
 
@@ -480,10 +536,12 @@
 
 
 
+                <!-- ================================================= -->
+                <!-- WRONG -->
+                <!-- ================================================= -->
+
                 {% else %}
 
-
-                    <!-- WRONG -->
 
                     <div class="quick-answer-result quick-wrong">
 
@@ -513,20 +571,23 @@
 
 
 
-                <!-- NEXT -->
+                <!-- ================================================= -->
+                <!-- AUTO NEXT MESSAGE -->
+                <!-- ================================================= -->
 
-                <a
-                    class="quick-next-button"
-                    href="/quick_sort_next"
+                <div
+                    style="
+                        text-align: center;
+                        margin-top: 15px;
+                        color: #718276;
+                        font-size: 13px;
+                        font-weight: bold;
+                    "
                 >
 
-                    CÂU TIẾP THEO
+                    ⚡ Đang chuyển sang câu tiếp theo...
 
-                    <span>
-                        ➡️
-                    </span>
-
-                </a>
+                </div>
 
 
             {% endif %}
@@ -579,201 +640,34 @@
 
 
     /* =====================================================
-       TIMER SETTINGS
+       SETTINGS
        ===================================================== */
 
     const TIMER_DURATION = 10;
 
+
     let timeLeft = TIMER_DURATION;
 
 
+    let questionLocked = false;
+
+
 
     /* =====================================================
-       GET TIMER ELEMENTS
+       ELEMENTS
        ===================================================== */
 
     const timerText =
-        document.getElementById("timer-text");
+        document.getElementById(
+            "timer-text"
+        );
 
 
     const timerBar =
-        document.getElementById("timer-bar");
+        document.getElementById(
+            "timer-bar"
+        );
 
-
-
-    /* =====================================================
-       START TIMER
-       ===================================================== */
-
-    const timerInterval = setInterval(function () {
-
-
-        /* Reduce time */
-
-        timeLeft -= 0.1;
-
-
-
-        /* Don't allow negative time */
-
-        if (timeLeft < 0) {
-
-            timeLeft = 0;
-
-        }
-
-
-
-        /* =================================================
-           UPDATE TIMER NUMBER
-           ================================================= */
-
-        timerText.textContent =
-            timeLeft.toFixed(1) + "s";
-
-
-
-        /* =================================================
-           UPDATE TIMER BAR WIDTH
-           ================================================= */
-
-        const percentage =
-            (timeLeft / TIMER_DURATION) * 100;
-
-
-        timerBar.style.width =
-            percentage + "%";
-
-
-
-        /* =================================================
-           GREEN
-           ================================================= */
-
-        if (timeLeft > 5) {
-
-
-            timerBar.classList.remove(
-                "timer-warning"
-            );
-
-
-            timerBar.classList.remove(
-                "timer-danger"
-            );
-
-
-            timerText.classList.remove(
-                "timer-warning-text"
-            );
-
-
-            timerText.classList.remove(
-                "timer-danger-text"
-            );
-
-
-        }
-
-
-
-        /* =================================================
-           YELLOW
-           ================================================= */
-
-        else if (timeLeft > 3) {
-
-
-            timerBar.classList.add(
-                "timer-warning"
-            );
-
-
-            timerBar.classList.remove(
-                "timer-danger"
-            );
-
-
-            timerText.classList.add(
-                "timer-warning-text"
-            );
-
-
-            timerText.classList.remove(
-                "timer-danger-text"
-            );
-
-
-        }
-
-
-
-        /* =================================================
-           RED
-           ================================================= */
-
-        else {
-
-
-            timerBar.classList.remove(
-                "timer-warning"
-            );
-
-
-            timerBar.classList.add(
-                "timer-danger"
-            );
-
-
-            timerText.classList.remove(
-                "timer-warning-text"
-            );
-
-
-            timerText.classList.add(
-                "timer-danger-text"
-            );
-
-
-        }
-
-
-
-        /* =================================================
-           TIME UP
-           ================================================= */
-
-        if (timeLeft <= 0) {
-
-
-            clearInterval(
-                timerInterval
-            );
-
-
-            timerText.textContent =
-                "HẾT GIỜ!";
-
-
-            timerBar.style.width =
-                "0%";
-
-
-            console.log(
-                "SmartTrash timer finished!"
-            );
-
-
-        }
-
-
-    }, 100);
-
-
-
-    /* =====================================================
-       STOP TIMER IF PLAYER ANSWERS
-       ===================================================== */
 
     const answerForm =
         document.getElementById(
@@ -781,17 +675,39 @@
         );
 
 
-    if (answerForm) {
+    const timeoutForm =
+        document.getElementById(
+            "quick-timeout-form"
+        );
 
 
-        answerForm.addEventListener(
-            "submit",
-            function () {
+    const answerButtons =
+        document.querySelectorAll(
+            ".quick-option"
+        );
 
 
-                clearInterval(
-                    timerInterval
-                );
+
+    /* =====================================================
+       DISABLE BUTTONS
+       ===================================================== */
+
+    function disableAnswers() {
+
+
+        answerButtons.forEach(
+            function (button) {
+
+
+                button.disabled = true;
+
+
+                button.style.pointerEvents =
+                    "none";
+
+
+                button.style.opacity =
+                    "0.55";
 
 
             }
@@ -799,6 +715,310 @@
 
 
     }
+
+
+
+    /* =====================================================
+       START TIMER
+       ===================================================== */
+
+    const timerInterval =
+        setInterval(
+            function () {
+
+
+                if (questionLocked) {
+
+                    return;
+
+                }
+
+
+
+                timeLeft -= 0.1;
+
+
+
+                if (timeLeft < 0) {
+
+                    timeLeft = 0;
+
+                }
+
+
+
+                /* =========================================
+                   UPDATE NUMBER
+                   ========================================= */
+
+                timerText.textContent =
+
+                    timeLeft.toFixed(1)
+
+                    + "s";
+
+
+
+                /* =========================================
+                   UPDATE BAR
+                   ========================================= */
+
+                const percentage =
+
+                    (
+                        timeLeft
+                        /
+                        TIMER_DURATION
+                    )
+
+                    * 100;
+
+
+                timerBar.style.width =
+
+                    percentage
+
+                    + "%";
+
+
+
+                /* =========================================
+                   GREEN
+                   ========================================= */
+
+                if (timeLeft > 5) {
+
+
+                    timerBar.classList.remove(
+                        "timer-warning"
+                    );
+
+
+                    timerBar.classList.remove(
+                        "timer-danger"
+                    );
+
+
+                    timerText.classList.remove(
+                        "timer-warning-text"
+                    );
+
+
+                    timerText.classList.remove(
+                        "timer-danger-text"
+                    );
+
+
+                }
+
+
+
+                /* =========================================
+                   YELLOW
+                   ========================================= */
+
+                else if (timeLeft > 3) {
+
+
+                    timerBar.classList.add(
+                        "timer-warning"
+                    );
+
+
+                    timerBar.classList.remove(
+                        "timer-danger"
+                    );
+
+
+                    timerText.classList.add(
+                        "timer-warning-text"
+                    );
+
+
+                    timerText.classList.remove(
+                        "timer-danger-text"
+                    );
+
+
+                }
+
+
+
+                /* =========================================
+                   RED
+                   ========================================= */
+
+                else {
+
+
+                    timerBar.classList.remove(
+                        "timer-warning"
+                    );
+
+
+                    timerBar.classList.add(
+                        "timer-danger"
+                    );
+
+
+                    timerText.classList.remove(
+                        "timer-warning-text"
+                    );
+
+
+                    timerText.classList.add(
+                        "timer-danger-text"
+                    );
+
+
+                }
+
+
+
+                /* =========================================
+                   TIME OUT
+                   ========================================= */
+
+                if (timeLeft <= 0) {
+
+
+                    questionLocked = true;
+
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    timerText.textContent =
+                        "HẾT GIỜ!";
+
+
+                    timerBar.style.width =
+                        "0%";
+
+
+                    disableAnswers();
+
+
+
+                    /*
+                        Submit the hidden timeout form.
+
+                        Flask will now count this
+                        question as attempted/wrong.
+                    */
+
+                    setTimeout(
+                        function () {
+
+
+                            timeoutForm.submit();
+
+
+                        },
+                        250
+                    );
+
+
+                }
+
+
+            },
+
+            100
+        );
+
+
+
+    /* =====================================================
+       PLAYER ANSWERS BEFORE TIMEOUT
+       ===================================================== */
+
+    if (answerForm) {
+
+
+        answerForm.addEventListener(
+            "submit",
+            function (event) {
+
+
+                /*
+                    If timeout already happened,
+                    DO NOT allow another answer.
+                */
+
+                if (questionLocked) {
+
+
+                    event.preventDefault();
+
+
+                    return;
+
+
+                }
+
+
+
+                /*
+                    Lock immediately.
+
+                    This prevents double-clicking.
+                */
+
+                questionLocked = true;
+
+
+                clearInterval(
+                    timerInterval
+                );
+
+
+                disableAnswers();
+
+
+            }
+        );
+
+
+    }
+
+
+</script>
+
+
+{% endif %}
+
+
+
+<!-- ===================================================== -->
+<!-- AUTO NEXT JAVASCRIPT -->
+<!-- ===================================================== -->
+
+{% if not finished and answered %}
+
+
+<script>
+
+
+    /*
+        Show result briefly,
+        then automatically continue.
+    */
+
+    setTimeout(
+        function () {
+
+
+            window.location.href =
+                "/quick_sort_next";
+
+
+        },
+
+        1200
+    );
 
 
 </script>
