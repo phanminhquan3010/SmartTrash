@@ -1175,7 +1175,7 @@ def quick_sort_next():
         correct=session.get("quick_correct", 0),
         total=session.get("quick_total", 0),
         streak=session.get("quick_streak", 0),
-        best_streak=get_quick_best_streak(username),
+        best_streak=session.get("quick_best_streak", 0),
         new_best=False,
         leaderboard=get_quick_leaderboard(),
         answered=False,
