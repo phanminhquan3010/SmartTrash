@@ -87,7 +87,6 @@ def set_name():
     if not name:
         return redirect("/")
 
-    # Limit name length
     name = name[:20]
 
     conn = get_db()
@@ -97,7 +96,6 @@ def set_name():
         (name,)
     ).fetchone()
 
-    # Create new player if needed
     if not player:
 
         conn.execute("""
@@ -110,14 +108,16 @@ def set_name():
 
     conn.close()
 
-    # Set current player
     session["player"] = name
 
-    # Remove previous quiz session
     session.pop("round_questions", None)
     session.pop("current_question", None)
 
-    # Start a fresh quiz
+    session.pop("quick_item", None)
+    session.pop("quick_score", None)
+    session.pop("quick_correct", None)
+    session.pop("quick_total", None)
+
     return redirect("/start_quiz")
 
 
@@ -137,7 +137,6 @@ def change_name():
 
     conn = get_db()
 
-    # Check whether this name already exists
     existing = conn.execute("""
         SELECT *
         FROM players
@@ -146,8 +145,6 @@ def change_name():
 
     conn.close()
 
-    # If the player already exists,
-    # simply switch to that player.
     if existing:
 
         session["player"] = new_name
@@ -155,9 +152,13 @@ def change_name():
         session.pop("round_questions", None)
         session.pop("current_question", None)
 
+        session.pop("quick_item", None)
+        session.pop("quick_score", None)
+        session.pop("quick_correct", None)
+        session.pop("quick_total", None)
+
         return redirect("/start_quiz")
 
-    # Otherwise create a new player
     conn = get_db()
 
     conn.execute("""
@@ -174,6 +175,11 @@ def change_name():
     session.pop("round_questions", None)
     session.pop("current_question", None)
 
+    session.pop("quick_item", None)
+    session.pop("quick_score", None)
+    session.pop("quick_correct", None)
+    session.pop("quick_total", None)
+
     return redirect("/start_quiz")
 
 
@@ -184,12 +190,15 @@ def change_name():
 @app.route("/switch_player")
 def switch_player():
 
-    # Clear current player
     session.pop("player", None)
 
-    # Clear quiz session
     session.pop("round_questions", None)
     session.pop("current_question", None)
+
+    session.pop("quick_item", None)
+    session.pop("quick_score", None)
+    session.pop("quick_correct", None)
+    session.pop("quick_total", None)
 
     return redirect("/")
 
@@ -208,7 +217,6 @@ def start_quiz():
 
     conn = get_db()
 
-    # Reset THIS player's score
     conn.execute("""
         UPDATE players
         SET score = 0,
@@ -216,7 +224,6 @@ def start_quiz():
         WHERE name = ?
     """, (player,))
 
-    # Reset THIS player's answered questions
     conn.execute("""
         DELETE FROM answered_questions
         WHERE player_name = ?
@@ -225,7 +232,6 @@ def start_quiz():
     conn.commit()
     conn.close()
 
-    # Remove old random round
     session.pop("round_questions", None)
     session.pop("current_question", None)
 
@@ -247,7 +253,6 @@ def quiz():
 
     conn = get_db()
 
-    # Get answered questions
     answered_rows = conn.execute("""
         SELECT question_id
         FROM answered_questions
@@ -259,7 +264,6 @@ def quiz():
         for row in answered_rows
     }
 
-    # Get player information
     player_data = conn.execute("""
         SELECT score, items
         FROM players
@@ -269,7 +273,9 @@ def quiz():
     conn.close()
 
     if not player_data:
+
         session.pop("player", None)
+
         return redirect("/")
 
 
@@ -283,7 +289,6 @@ def quiz():
 
         all_ids = [q["id"] for q in QUESTIONS]
 
-        # More than 100 questions
         if len(all_ids) > QUESTIONS_PER_ROUND:
 
             round_questions = random.sample(
@@ -291,7 +296,6 @@ def quiz():
                 QUESTIONS_PER_ROUND
             )
 
-        # Exactly 100 or fewer
         else:
 
             round_questions = all_ids[:]
@@ -519,6 +523,276 @@ def answer():
         correct=player_data["items"],
 
         finished=False
+    )
+
+
+# =========================================================
+# ⚡ QUICK SORT MODE
+# =========================================================
+
+QUICK_SORT_ITEMS = [
+
+    {
+        "name": "🥤 Chai nhựa",
+        "answer": "recycle"
+    },
+
+    {
+        "name": "🍎 Vỏ trái cây",
+        "answer": "organic"
+    },
+
+    {
+        "name": "🔋 Pin đã qua sử dụng",
+        "answer": "dangerous"
+    },
+
+    {
+        "name": "📄 Giấy vụn",
+        "answer": "recycle"
+    },
+
+    {
+        "name": "🥫 Lon nước ngọt",
+        "answer": "recycle"
+    },
+
+    {
+        "name": "🍌 Vỏ chuối",
+        "answer": "organic"
+    },
+
+    {
+        "name": "🧪 Chai hóa chất",
+        "answer": "dangerous"
+    },
+
+    {
+        "name": "🍚 Thức ăn thừa",
+        "answer": "organic"
+    },
+
+    {
+        "name": "🍾 Chai thủy tinh",
+        "answer": "recycle"
+    },
+
+    {
+        "name": "📰 Báo cũ",
+        "answer": "recycle"
+    },
+
+    {
+        "name": "☕ Bã cà phê",
+        "answer": "organic"
+    },
+
+    {
+        "name": "💊 Thuốc hết hạn",
+        "answer": "dangerous"
+    },
+
+    {
+        "name": "📦 Thùng carton",
+        "answer": "recycle"
+    },
+
+    {
+        "name": "🥬 Rau củ hỏng",
+        "answer": "organic"
+    },
+
+    {
+        "name": "💡 Bóng đèn hỏng",
+        "answer": "dangerous"
+    }
+
+]
+
+
+# =========================
+# START QUICK SORT
+# =========================
+
+@app.route("/quick_sort")
+def quick_sort():
+
+    username = session.get("player")
+
+    if not username:
+        return redirect("/")
+
+
+    # Start a fresh Quick Sort game
+
+    session["quick_score"] = 0
+    session["quick_correct"] = 0
+    session["quick_total"] = 0
+
+    item = random.choice(QUICK_SORT_ITEMS)
+
+    session["quick_item"] = item
+
+    return render_template(
+        "quick_sort.html",
+
+        username=username,
+
+        item=item,
+
+        score=0,
+
+        correct=0,
+
+        total=0,
+
+        answered=False,
+
+        finished=False
+    )
+
+
+# =========================
+# ANSWER QUICK SORT
+# =========================
+
+@app.route("/quick_sort_answer", methods=["POST"])
+def quick_sort_answer():
+
+    username = session.get("player")
+
+    if not username:
+        return redirect("/")
+
+
+    item = session.get("quick_item")
+
+    if not item:
+        return redirect("/quick_sort")
+
+
+    selected_answer = request.form.get("answer")
+
+    correct_answer = item["answer"]
+
+    is_correct = (
+        selected_answer == correct_answer
+    )
+
+
+    score = session.get("quick_score", 0)
+
+    correct = session.get("quick_correct", 0)
+
+    total = session.get("quick_total", 0)
+
+
+    total += 1
+
+
+    if is_correct:
+
+        score += 10
+        correct += 1
+
+
+    session["quick_score"] = score
+    session["quick_correct"] = correct
+    session["quick_total"] = total
+
+
+    return render_template(
+        "quick_sort.html",
+
+        username=username,
+
+        item=item,
+
+        selected_answer=selected_answer,
+
+        is_correct=is_correct,
+
+        score=score,
+
+        correct=correct,
+
+        total=total,
+
+        answered=True,
+
+        finished=False
+    )
+
+
+# =========================
+# NEXT QUICK SORT ITEM
+# =========================
+
+@app.route("/quick_sort_next")
+def quick_sort_next():
+
+    username = session.get("player")
+
+    if not username:
+        return redirect("/")
+
+
+    item = random.choice(QUICK_SORT_ITEMS)
+
+    session["quick_item"] = item
+
+
+    return render_template(
+        "quick_sort.html",
+
+        username=username,
+
+        item=item,
+
+        score=session.get("quick_score", 0),
+
+        correct=session.get("quick_correct", 0),
+
+        total=session.get("quick_total", 0),
+
+        answered=False,
+
+        finished=False
+    )
+
+
+# =========================
+# FINISH QUICK SORT
+# =========================
+
+@app.route("/quick_sort_finish")
+def quick_sort_finish():
+
+    username = session.get("player")
+
+    if not username:
+        return redirect("/")
+
+
+    score = session.get("quick_score", 0)
+
+    correct = session.get("quick_correct", 0)
+
+    total = session.get("quick_total", 0)
+
+
+    return render_template(
+        "quick_sort.html",
+
+        username=username,
+
+        score=score,
+
+        correct=correct,
+
+        total=total,
+
+        finished=True
     )
 
 
