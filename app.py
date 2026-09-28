@@ -1002,6 +1002,7 @@ def quick_sort():
     session["quick_correct"] = 0
     session["quick_total"] = 0
     session["quick_streak"] = 0
+    session["quick_best_streak"] = get_quick_best_streak(username)
     session["quick_answered"] = False
 
     item = random.choice(QUICK_SORT_ITEMS)
@@ -1052,9 +1053,13 @@ def quick_sort_answer():
     total = session.get("quick_total", 0)
     streak = session.get("quick_streak", 0)
 
-    total += 1
+      total += 1
     new_best = False
-    best_streak = get_quick_best_streak(username)
+
+    best_streak = session.get(
+        "quick_best_streak",
+        0
+    )
 
     if is_correct:
         score += 10
@@ -1062,42 +1067,9 @@ def quick_sort_answer():
         streak += 1
 
         if streak > best_streak:
-    new_best = True
+            best_streak = streak
+            new_best = True
 
-    conn = get_db()
-
-    conn.execute("""
-        INSERT OR IGNORE INTO players
-        (name, score, items, quick_best_streak)
-        VALUES (?, 0, 0, 0)
-    """, (username,))
-
-    conn.execute("""
-        UPDATE players
-        SET quick_best_streak = ?
-        WHERE name = ?
-    """, (streak, username))
-
-    conn.commit()
-    conn.close()
-
-    # READ THE VALUE BACK FROM DATABASE
-    best_streak = get_quick_best_streak(username)
-
-    saved_player = conn.execute("""
-        SELECT quick_best_streak
-        FROM players
-        WHERE name = ?
-    """, (
-        username,
-    )).fetchone()
-
-    conn.close()
-
-    if saved_player:
-        best_streak = saved_player["quick_best_streak"]
-    else:
-        best_streak = streak
     else:
         streak = 0
 
@@ -1105,6 +1077,7 @@ def quick_sort_answer():
     session["quick_correct"] = correct
     session["quick_total"] = total
     session["quick_streak"] = streak
+    session["quick_best_streak"] = best_streak
     session["quick_answered"] = True
 
     return render_template(
@@ -1229,7 +1202,7 @@ def quick_sort_finish():
         correct=session.get("quick_correct", 0),
         total=session.get("quick_total", 0),
         streak=session.get("quick_streak", 0),
-        best_streak=get_quick_best_streak(username),
+        best_streak=session.get("quick_best_streak", 0),
         new_best=False,
         leaderboard=get_quick_leaderboard(),
         finished=True
