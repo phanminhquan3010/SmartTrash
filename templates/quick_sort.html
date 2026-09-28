@@ -2,7 +2,6 @@
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -14,21 +13,18 @@
 
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}?v=6"
+        href="{{ url_for('static', filename='style.css') }}?v=7"
     >
-
 </head>
 
 
 <body class="quick-body">
 
-
 <div class="quick-container">
 
-
-    <!-- ================================================= -->
+    <!-- ============================= -->
     <!-- HEADER -->
-    <!-- ================================================= -->
+    <!-- ============================= -->
 
     <div class="quick-header">
 
@@ -36,9 +32,7 @@
             ⚡ SPEED MODE
         </div>
 
-        <h1>
-            PHÂN LOẠI NHANH
-        </h1>
+        <h1>PHÂN LOẠI NHANH</h1>
 
         <p>
             Chọn đúng thùng rác nhanh nhất có thể! ♻️
@@ -47,13 +41,11 @@
     </div>
 
 
-
-    <!-- ================================================= -->
-    <!-- STATS -->
-    <!-- ================================================= -->
+    <!-- ============================= -->
+    <!-- PLAYER STATS -->
+    <!-- ============================= -->
 
     <div class="quick-stats">
-
 
         <div class="quick-player">
 
@@ -62,1005 +54,747 @@
             </span>
 
             <div>
-
-                <small>
-                    NGƯỜI CHƠI
-                </small>
-
-                <strong>
-                    {{ username }}
-                </strong>
-
+                <small>NGƯỜI CHƠI</small>
+                <strong>{{ username }}</strong>
             </div>
 
         </div>
-
 
 
         <div class="quick-stat">
 
-            <span>
-                🌱
-            </span>
+            <span>🌱</span>
 
             <div>
-
-                <small>
-                    ĐIỂM
-                </small>
-
-                <strong>
-                    {{ score }}
-                </strong>
-
+                <small>ĐIỂM</small>
+                <strong>{{ score }}</strong>
             </div>
 
         </div>
-
 
 
         <div class="quick-stat">
 
-            <span>
-                ✅
-            </span>
+            <span>✅</span>
 
             <div>
-
-                <small>
-                    ĐÚNG
-                </small>
-
-                <strong>
-                    {{ correct }}
-                </strong>
-
+                <small>ĐÚNG</small>
+                <strong>{{ correct }}</strong>
             </div>
 
         </div>
-
 
     </div>
 
 
-
-    <!-- ================================================= -->
-    <!-- FINISHED -->
-    <!-- ================================================= -->
+    <!-- ============================= -->
+    <!-- FINISHED SCREEN -->
+    <!-- ============================= -->
 
     {% if finished %}
 
+    <div class="quick-game-card quick-finished">
 
-        <div class="quick-game-card quick-finished">
+        <div class="quick-finish-icon">
+            🏆
+        </div>
+
+        <h2>HOÀN THÀNH!</h2>
+
+        <p>
+            Bạn đã hoàn thành thử thách
+            <strong>Phân loại nhanh!</strong>
+        </p>
 
 
-            <div class="quick-finish-icon">
-                🏆
+        <div class="quick-result-stats">
+
+            <div>
+                <span>🌱</span>
+                <strong>{{ score }}</strong>
+                <small>ĐIỂM</small>
             </div>
 
-
-            <h2>
-                HOÀN THÀNH!
-            </h2>
-
-
-            <p>
-                Bạn đã hoàn thành thử thách
-                <strong>Phân loại nhanh!</strong>
-            </p>
-
-
-
-            <div class="quick-result-stats">
-
-
-                <div>
-
-                    <span>🌱</span>
-
-                    <strong>
-                        {{ score }}
-                    </strong>
-
-                    <small>
-                        ĐIỂM
-                    </small>
-
-                </div>
-
-
-
-                <div>
-
-                    <span>✅</span>
-
-                    <strong>
-                        {{ correct }}
-                    </strong>
-
-                    <small>
-                        CÂU ĐÚNG
-                    </small>
-
-                </div>
-
-
-
-                <div>
-
-                    <span>📊</span>
-
-                    <strong>
-                        {{ total }}
-                    </strong>
-
-                    <small>
-                        TỔNG CÂU
-                    </small>
-
-                </div>
-
-
+            <div>
+                <span>✅</span>
+                <strong>{{ correct }}</strong>
+                <small>CÂU ĐÚNG</small>
             </div>
 
-
-
-            <div class="quick-finish-buttons">
-
-
-                <a
-                    class="quick-play-again"
-                    href="/quick_sort"
-                >
-                    🔄 CHƠI LẠI
-                </a>
-
-
-                <a
-                    class="quick-home-button"
-                    href="/"
-                >
-                    🏠 TRANG CHỦ
-                </a>
-
-
+            <div>
+                <span>📊</span>
+                <strong>{{ total }}</strong>
+                <small>TỔNG CÂU</small>
             </div>
-
 
         </div>
 
 
+        <div class="quick-finish-buttons">
 
-    <!-- ================================================= -->
-    <!-- GAME -->
-    <!-- ================================================= -->
+            <a
+                class="quick-play-again"
+                href="/quick_sort"
+            >
+                🔄 CHƠI LẠI
+            </a>
+
+            <a
+                class="quick-home-button"
+                href="/"
+            >
+                🏠 TRANG CHỦ
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- GAME SCREEN -->
+    <!-- ============================= -->
 
     {% else %}
 
-
-        <div class="quick-game-card">
-
-
-            <!-- ================================================= -->
-            <!-- TIMER -->
-            <!-- ================================================= -->
-
-            {% if not answered %}
+    <div class="quick-game-card">
 
 
-                <div class="quick-timer">
+        <!-- ============================= -->
+        <!-- TIMER -->
+        <!-- ============================= -->
 
+        {% if not answered %}
 
-                    <div class="quick-timer-info">
+        <div class="quick-timer">
 
+            <div class="quick-timer-info">
 
-                        <span>
-                            ⏱️ THỜI GIAN
-                        </span>
+                <span>
+                    ⏱️ THỜI GIAN
+                </span>
 
-
-                        <strong id="timer-text">
-                            10.0s
-                        </strong>
-
-
-                    </div>
-
-
-
-                    <div class="quick-timer-track">
-
-                        <div
-                            class="quick-timer-bar"
-                            id="timer-bar"
-                        ></div>
-
-                    </div>
-
-
-                </div>
-
-
-            {% endif %}
-
-
-
-            <!-- ================================================= -->
-            <!-- QUESTION -->
-            <!-- ================================================= -->
-
-            <div class="quick-question-label">
-
-                🗑️ BẠN SẼ BỎ RÁC NÀY VÀO ĐÂU?
+                <strong id="timer-text">
+                    10.0s
+                </strong>
 
             </div>
 
 
-
-            <!-- ================================================= -->
-            <!-- ITEM -->
-            <!-- ================================================= -->
-
-            <div class="quick-trash-card">
-
-
-                <div class="quick-trash-icon">
-                    🗑️
-                </div>
-
-
-                <div class="quick-trash-name">
-
-                    {{ item.name }}
-
-                </div>
-
-
-                <div class="quick-trash-hint">
-
-
-                    {% if answered and timed_out %}
-
-                        ⏰ Bạn đã hết thời gian!
-
-
-                    {% elif answered %}
-
-                        Chuẩn bị cho câu tiếp theo... ⚡
-
-
-                    {% else %}
-
-                        Chọn loại rác phù hợp bên dưới
-
-                    {% endif %}
-
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- ================================================= -->
-            <!-- ANSWERS -->
-            <!-- ================================================= -->
-
-            {% if not answered %}
-
-
-                <form
-                    class="quick-options"
-                    action="/quick_sort_answer"
-                    method="POST"
-                    id="quick-answer-form"
-                >
-
-
-                    <!--
-                        IMPORTANT:
-
-                        JavaScript writes the selected answer
-                        into THIS hidden input BEFORE the
-                        buttons are disabled.
-
-                        Flask will therefore always receive
-                        recycle / organic / dangerous.
-                    -->
-
-                    <input
-                        type="hidden"
-                        name="answer"
-                        id="selected-answer"
-                        value=""
-                    >
-
-
-
-                    <!-- ============================= -->
-                    <!-- RECYCLE -->
-                    <!-- ============================= -->
-
-                    <button
-                        class="quick-option recycle-option"
-                        type="button"
-                        data-answer="recycle"
-                    >
-
-                        <span class="option-icon">
-                            ♻️
-                        </span>
-
-                        <span class="option-title">
-                            TÁI CHẾ
-                        </span>
-
-                        <span class="option-description">
-                            Nhựa · Giấy · Kim loại
-                        </span>
-
-                    </button>
-
-
-
-                    <!-- ============================= -->
-                    <!-- ORGANIC -->
-                    <!-- ============================= -->
-
-                    <button
-                        class="quick-option organic-option"
-                        type="button"
-                        data-answer="organic"
-                    >
-
-                        <span class="option-icon">
-                            🍎
-                        </span>
-
-                        <span class="option-title">
-                            HỮU CƠ
-                        </span>
-
-                        <span class="option-description">
-                            Thức ăn · Lá cây
-                        </span>
-
-                    </button>
-
-
-
-                    <!-- ============================= -->
-                    <!-- DANGEROUS -->
-                    <!-- ============================= -->
-
-                    <button
-                        class="quick-option dangerous-option"
-                        type="button"
-                        data-answer="dangerous"
-                    >
-
-                        <span class="option-icon">
-                            ☣️
-                        </span>
-
-                        <span class="option-title">
-                            NGUY HẠI
-                        </span>
-
-                        <span class="option-description">
-                            Pin · Hóa chất
-                        </span>
-
-                    </button>
-
-
-                </form>
-
-
-
-                <!-- ================================================= -->
-                <!-- TIMEOUT FORM -->
-                <!-- ================================================= -->
-
-                <form
-                    action="/quick_sort_timeout"
-                    method="POST"
-                    id="quick-timeout-form"
-                    style="display: none;"
-                >
-                </form>
-
-
-
-            <!-- ================================================= -->
-            <!-- RESULT -->
-            <!-- ================================================= -->
-
-            {% else %}
-
-
-
-                <!-- ================================================= -->
-                <!-- TIMEOUT RESULT -->
-                <!-- ================================================= -->
-
-                {% if timed_out %}
-
-
-                    <div class="quick-answer-result quick-wrong">
-
-
-                        <div class="result-icon">
-                            ⏰
-                        </div>
-
-
-                        <div>
-
-                            <h2>
-                                HẾT GIỜ!
-                            </h2>
-
-                            <p>
-                                Nhanh hơn ở câu tiếp theo nhé! ⚡
-                            </p>
-
-                        </div>
-
-
-                    </div>
-
-
-
-                <!-- ================================================= -->
-                <!-- CORRECT RESULT -->
-                <!-- ================================================= -->
-
-                {% elif is_correct %}
-
-
-                    <div class="quick-answer-result quick-correct">
-
-
-                        <div class="result-icon">
-                            ✅
-                        </div>
-
-
-                        <div>
-
-                            <h2>
-                                CHÍNH XÁC!
-                            </h2>
-
-                            <p>
-                                Quá ngon bro! +10 🌱
-                            </p>
-
-                        </div>
-
-
-                    </div>
-
-
-
-                <!-- ================================================= -->
-                <!-- WRONG RESULT -->
-                <!-- ================================================= -->
-
-                {% else %}
-
-
-                    <div class="quick-answer-result quick-wrong">
-
-
-                        <div class="result-icon">
-                            ❌
-                        </div>
-
-
-                        <div>
-
-                            <h2>
-                                CHƯA ĐÚNG!
-                            </h2>
-
-                            <p>
-                                Hãy nhớ phân loại rác đúng cách nhé!
-                            </p>
-
-                        </div>
-
-
-                    </div>
-
-
-                {% endif %}
-
-
-
-                <!-- ================================================= -->
-                <!-- AUTO NEXT TEXT -->
-                <!-- ================================================= -->
+            <div class="quick-timer-track">
 
                 <div
-                    style="
-                        text-align: center;
-                        margin-top: 15px;
-                        color: #718276;
-                        font-size: 13px;
-                        font-weight: bold;
-                    "
-                >
+                    class="quick-timer-bar"
+                    id="timer-bar"
+                ></div>
 
-                    ⚡ Đang chuyển sang câu tiếp theo...
-
-                </div>
-
-
-            {% endif %}
-
+            </div>
 
         </div>
 
+        {% endif %}
+
+
+        <!-- ============================= -->
+        <!-- QUESTION -->
+        <!-- ============================= -->
+
+        <div class="quick-question-label">
+
+            🗑️ BẠN SẼ BỎ RÁC NÀY VÀO ĐÂU?
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- TRASH ITEM -->
+        <!-- ============================= -->
+
+        <div class="quick-trash-card">
+
+            <div class="quick-trash-icon">
+                🗑️
+            </div>
+
+            <div class="quick-trash-name">
+                {{ item.name }}
+            </div>
+
+            <div class="quick-trash-hint">
+
+                {% if answered and timed_out %}
+
+                    ⏰ Bạn đã hết thời gian!
+
+                {% elif answered %}
+
+                    Chuẩn bị cho câu tiếp theo... ⚡
+
+                {% else %}
+
+                    Chọn loại rác phù hợp bên dưới
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- ANSWER BUTTONS -->
+        <!-- ============================= -->
+
+        {% if not answered %}
+
+        <form
+            class="quick-options"
+            action="{{ url_for('quick_sort_answer') }}"
+            method="POST"
+            id="quick-answer-form"
+        >
+
+            <!-- RECYCLE -->
+
+            <button
+                class="quick-option recycle-option"
+                type="submit"
+                name="answer"
+                value="recycle"
+            >
+
+                <span class="option-icon">
+                    ♻️
+                </span>
+
+                <span class="option-title">
+                    TÁI CHẾ
+                </span>
+
+                <span class="option-description">
+                    Nhựa · Giấy · Kim loại
+                </span>
+
+            </button>
+
+
+            <!-- ORGANIC -->
+
+            <button
+                class="quick-option organic-option"
+                type="submit"
+                name="answer"
+                value="organic"
+            >
+
+                <span class="option-icon">
+                    🍎
+                </span>
+
+                <span class="option-title">
+                    HỮU CƠ
+                </span>
+
+                <span class="option-description">
+                    Thức ăn · Lá cây
+                </span>
+
+            </button>
+
+
+            <!-- DANGEROUS -->
+
+            <button
+                class="quick-option dangerous-option"
+                type="submit"
+                name="answer"
+                value="dangerous"
+            >
+
+                <span class="option-icon">
+                    ☣️
+                </span>
+
+                <span class="option-title">
+                    NGUY HẠI
+                </span>
+
+                <span class="option-description">
+                    Pin · Hóa chất
+                </span>
+
+            </button>
+
+        </form>
+
+
+        <!-- ============================= -->
+        <!-- TIMEOUT FORM -->
+        <!-- ============================= -->
+
+        <form
+            action="{{ url_for('quick_sort_timeout') }}"
+            method="POST"
+            id="quick-timeout-form"
+            style="display: none;"
+        ></form>
+
+
+        <!-- ============================= -->
+        <!-- ANSWER RESULTS -->
+        <!-- ============================= -->
+
+        {% else %}
+
+
+            <!-- TIMEOUT -->
+
+            {% if timed_out %}
+
+            <div class="quick-answer-result quick-wrong">
+
+                <div class="result-icon">
+                    ⏰
+                </div>
+
+                <div>
+
+                    <h2>HẾT GIỜ!</h2>
+
+                    <p>
+                        Nhanh hơn ở câu tiếp theo nhé! ⚡
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- CORRECT -->
+
+            {% elif is_correct %}
+
+            <div class="quick-answer-result quick-correct">
+
+                <div class="result-icon">
+                    ✅
+                </div>
+
+                <div>
+
+                    <h2>CHÍNH XÁC!</h2>
+
+                    <p>
+                        Quá ngon bro! +10 🌱
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- WRONG -->
+
+            {% else %}
+
+            <div class="quick-answer-result quick-wrong">
+
+                <div class="result-icon">
+                    ❌
+                </div>
+
+                <div>
+
+                    <h2>CHƯA ĐÚNG!</h2>
+
+                    <p>
+                        Hãy nhớ phân loại rác đúng cách nhé!
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- NEXT BUTTON -->
+
+            <a
+                class="quick-next-button"
+                href="{{ url_for('quick_sort_next') }}"
+            >
+
+                CÂU TIẾP THEO
+
+                <span>➡️</span>
+
+            </a>
+
+
+            <p
+                style="
+                    text-align: center;
+                    margin-top: 15px;
+                    color: #718276;
+                    font-size: 13px;
+                    font-weight: bold;
+                "
+            >
+                ⚡ Tự động chuyển câu sau 1.2 giây...
+            </p>
+
+
+        {% endif %}
+
+    </div>
 
     {% endif %}
 
 
-
-    <!-- ================================================= -->
+    <!-- ============================= -->
     <!-- FOOTER -->
-    <!-- ================================================= -->
+    <!-- ============================= -->
 
     <div class="quick-footer">
-
 
         <a href="/">
             🏠 Smart Trash
         </a>
 
-
-        <span>
-            ·
-        </span>
-
+        <span>·</span>
 
         <span>
             Vì một môi trường xanh hơn 🌱
         </span>
 
-
     </div>
-
 
 </div>
 
 
-
-<!-- ===================================================== -->
-<!-- TIMER + ANSWER JAVASCRIPT -->
-<!-- ===================================================== -->
+<!-- ========================================= -->
+<!-- TIMER AND ANSWER HANDLING -->
+<!-- ========================================= -->
 
 {% if not finished and not answered %}
 
-
 <script>
 
-
-    // =====================================================
+    // =========================================
     // SETTINGS
-    // =====================================================
+    // =========================================
 
     const TIMER_DURATION = 10;
 
+    const TIMER_MS = TIMER_DURATION * 1000;
 
-    let timeLeft = TIMER_DURATION;
-
+    const startTime = performance.now();
 
     let questionLocked = false;
 
+    let timerInterval = null;
 
 
-    // =====================================================
+    // =========================================
     // ELEMENTS
-    // =====================================================
+    // =========================================
 
-    const timerText =
-        document.getElementById(
-            "timer-text"
-        );
+    const timerText = document.getElementById(
+        "timer-text"
+    );
 
+    const timerBar = document.getElementById(
+        "timer-bar"
+    );
 
-    const timerBar =
-        document.getElementById(
-            "timer-bar"
-        );
+    const answerForm = document.getElementById(
+        "quick-answer-form"
+    );
 
+    const timeoutForm = document.getElementById(
+        "quick-timeout-form"
+    );
 
-    const answerForm =
-        document.getElementById(
-            "quick-answer-form"
-        );
-
-
-    const timeoutForm =
-        document.getElementById(
-            "quick-timeout-form"
-        );
+    const answerButtons = document.querySelectorAll(
+        ".quick-option"
+    );
 
 
-    const selectedAnswerInput =
-        document.getElementById(
-            "selected-answer"
-        );
-
-
-    const answerButtons =
-        document.querySelectorAll(
-            ".quick-option"
-        );
-
-
-
-    // =====================================================
-    // DISABLE ANSWERS
-    // =====================================================
+    // =========================================
+    // DISABLE BUTTONS ONLY ON TIMEOUT
+    // =========================================
 
     function disableAnswers() {
 
+        answerButtons.forEach(function(button) {
 
-        answerButtons.forEach(
+            button.disabled = true;
 
-            function (button) {
+            button.style.pointerEvents = "none";
 
+            button.style.opacity = "0.55";
 
-                button.disabled = true;
-
-
-                button.style.pointerEvents =
-                    "none";
-
-
-                button.style.opacity =
-                    "0.55";
-
-
-            }
-
-        );
-
+        });
 
     }
 
 
+    // =========================================
+    // TIMEOUT
+    // =========================================
 
-    // =====================================================
-    // ANSWER CLICK
-    // =====================================================
+    function handleTimeout() {
 
-    answerButtons.forEach(
+        if (questionLocked) {
+            return;
+        }
 
-        function (button) {
+        questionLocked = true;
 
+        clearInterval(timerInterval);
 
-            button.addEventListener(
+        timerText.textContent = "HẾT GIỜ!";
 
-                "click",
+        timerBar.style.width = "0%";
 
-                function () {
+        timerBar.classList.add("timer-danger");
 
+        timerText.classList.add(
+            "timer-danger-text"
+        );
 
-                    // Already answered / timed out
+        // On timeout, disabling buttons is safe.
+        // We are submitting the SEPARATE timeout form.
 
-                    if (questionLocked) {
+        disableAnswers();
 
-                        return;
+        timeoutForm.submit();
 
-                    }
-
-
-
-                    // Lock immediately
-
-                    questionLocked = true;
-
-
-
-                    // STOP TIMER
-
-                    clearInterval(
-                        timerInterval
-                    );
+    }
 
 
+    // =========================================
+    // UPDATE TIMER
+    // =========================================
 
-                    // =================================================
-                    // SAVE ANSWER BEFORE DISABLING BUTTONS
-                    // =================================================
+    function updateTimer() {
 
-                    const answer =
-                        button.dataset.answer;
+        if (questionLocked) {
+            return;
+        }
+
+        // Use actual elapsed time instead of
+        // repeatedly subtracting 0.1 seconds.
+
+        const elapsed = performance.now() - startTime;
+
+        const remaining = Math.max(
+            0,
+            TIMER_MS - elapsed
+        );
+
+        const timeLeft = remaining / 1000;
+
+        const percentage = (
+            remaining / TIMER_MS
+        ) * 100;
 
 
-                    selectedAnswerInput.value =
-                        answer;
+        // =====================================
+        // DISPLAY
+        // =====================================
+
+        timerText.textContent =
+            timeLeft.toFixed(1) + "s";
+
+        timerBar.style.width =
+            percentage + "%";
 
 
+        // =====================================
+        // COLOR CHANGES
+        // =====================================
 
-                    // NOW it is safe to disable everything
+        if (timeLeft > 5) {
 
-                    disableAnswers();
-
-
-
-                    // Submit form AFTER answer was stored
-
-                    answerForm.submit();
-
-
-                }
-
+            timerBar.classList.remove(
+                "timer-warning",
+                "timer-danger"
             );
 
+            timerText.classList.remove(
+                "timer-warning-text",
+                "timer-danger-text"
+            );
+
+        } else if (timeLeft > 3) {
+
+            timerBar.classList.add(
+                "timer-warning"
+            );
+
+            timerBar.classList.remove(
+                "timer-danger"
+            );
+
+            timerText.classList.add(
+                "timer-warning-text"
+            );
+
+            timerText.classList.remove(
+                "timer-danger-text"
+            );
+
+        } else {
+
+            timerBar.classList.remove(
+                "timer-warning"
+            );
+
+            timerBar.classList.add(
+                "timer-danger"
+            );
+
+            timerText.classList.remove(
+                "timer-warning-text"
+            );
+
+            timerText.classList.add(
+                "timer-danger-text"
+            );
 
         }
 
+
+        // =====================================
+        // TIMER FINISHED
+        // =====================================
+
+        if (remaining <= 0) {
+
+            handleTimeout();
+
+        }
+
+    }
+
+
+    // =========================================
+    // ANSWER SUBMISSION
+    // =========================================
+
+    answerForm.addEventListener(
+        "submit",
+        function(event) {
+
+            // If another answer has already been
+            // submitted, reject this submission.
+
+            if (questionLocked) {
+
+                event.preventDefault();
+
+                return;
+
+            }
+
+
+            // Check whether time has already run out.
+
+            const elapsed =
+                performance.now() - startTime;
+
+            if (elapsed >= TIMER_MS) {
+
+                event.preventDefault();
+
+                handleTimeout();
+
+                return;
+
+            }
+
+
+            // =====================================
+            // LOCK THE QUESTION
+            // =====================================
+
+            questionLocked = true;
+
+            clearInterval(timerInterval);
+
+
+            // IMPORTANT:
+            //
+            // DO NOT disable the submit button here.
+            //
+            // The clicked button contains:
+            //
+            // name="answer"
+            // value="recycle" / "organic" / "dangerous"
+            //
+            // Disabling it during submission
+            // can remove its value from the POST.
+            //
+            // We let the browser submit normally.
+
+
+        }
     );
 
 
+    // =========================================
+    // START TIMER
+    // =========================================
 
-    // =====================================================
-    // TIMER
-    // =====================================================
+    timerInterval = setInterval(
+        updateTimer,
+        50
+    );
 
-    const timerInterval =
-        setInterval(
 
-            function () {
+    // =========================================
+    // CLEANUP
+    // =========================================
 
+    window.addEventListener(
+        "pagehide",
+        function() {
 
-                if (questionLocked) {
+            clearInterval(timerInterval);
 
-                    return;
-
-                }
-
-
-
-                timeLeft -= 0.1;
-
-
-
-                if (timeLeft < 0) {
-
-                    timeLeft = 0;
-
-                }
-
-
-
-                // =================================================
-                // TIMER TEXT
-                // =================================================
-
-                timerText.textContent =
-
-                    timeLeft.toFixed(1)
-
-                    + "s";
-
-
-
-                // =================================================
-                // TIMER BAR
-                // =================================================
-
-                const percentage =
-
-                    (
-                        timeLeft
-                        /
-                        TIMER_DURATION
-                    )
-
-                    * 100;
-
-
-                timerBar.style.width =
-
-                    percentage
-
-                    + "%";
-
-
-
-                // =================================================
-                // GREEN
-                // =================================================
-
-                if (timeLeft > 5) {
-
-
-                    timerBar.classList.remove(
-                        "timer-warning"
-                    );
-
-
-                    timerBar.classList.remove(
-                        "timer-danger"
-                    );
-
-
-                    timerText.classList.remove(
-                        "timer-warning-text"
-                    );
-
-
-                    timerText.classList.remove(
-                        "timer-danger-text"
-                    );
-
-
-                }
-
-
-
-                // =================================================
-                // YELLOW
-                // =================================================
-
-                else if (timeLeft > 3) {
-
-
-                    timerBar.classList.add(
-                        "timer-warning"
-                    );
-
-
-                    timerBar.classList.remove(
-                        "timer-danger"
-                    );
-
-
-                    timerText.classList.add(
-                        "timer-warning-text"
-                    );
-
-
-                    timerText.classList.remove(
-                        "timer-danger-text"
-                    );
-
-
-                }
-
-
-
-                // =================================================
-                // RED
-                // =================================================
-
-                else {
-
-
-                    timerBar.classList.remove(
-                        "timer-warning"
-                    );
-
-
-                    timerBar.classList.add(
-                        "timer-danger"
-                    );
-
-
-                    timerText.classList.remove(
-                        "timer-warning-text"
-                    );
-
-
-                    timerText.classList.add(
-                        "timer-danger-text"
-                    );
-
-
-                }
-
-
-
-                // =================================================
-                // TIMEOUT
-                // =================================================
-
-                if (timeLeft <= 0) {
-
-
-                    questionLocked = true;
-
-
-                    clearInterval(
-                        timerInterval
-                    );
-
-
-                    timerText.textContent =
-                        "HẾT GIỜ!";
-
-
-                    timerBar.style.width =
-                        "0%";
-
-
-                    disableAnswers();
-
-
-
-                    // Send timeout to Flask
-
-                    setTimeout(
-
-                        function () {
-
-
-                            timeoutForm.submit();
-
-
-                        },
-
-                        250
-
-                    );
-
-
-                }
-
-
-            },
-
-            100
-
-        );
-
+        }
+    );
 
 </script>
-
 
 {% endif %}
 
 
-
-<!-- ===================================================== -->
+<!-- ========================================= -->
 <!-- AUTO NEXT -->
-<!-- ===================================================== -->
+<!-- ========================================= -->
 
 {% if not finished and answered %}
 
-
 <script>
 
-
     setTimeout(
+        function() {
 
-        function () {
-
-
-            window.location.href =
-                "/quick_sort_next";
-
+            window.location.replace(
+                "{{ url_for('quick_sort_next') }}"
+            );
 
         },
-
         1200
-
     );
 
-
 </script>
-
 
 {% endif %}
 
 
 </body>
-
 </html>
