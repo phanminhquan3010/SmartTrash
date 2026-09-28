@@ -14,10 +14,10 @@
 
 
     <!-- CSS -->
-    <!-- v=3 forces browser to load newest CSS -->
+    <!-- v=4 forces browser to load newest CSS -->
     <link
         rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}?v=3"
+        href="{{ url_for('static', filename='style.css') }}?v=4"
     >
 
 </head>
@@ -134,7 +134,7 @@
 
 
     <!-- ================================================= -->
-    <!-- FINISHED SCREEN -->
+    <!-- FINISHED -->
     <!-- ================================================= -->
 
     {% if finished %}
@@ -160,7 +160,7 @@
 
 
 
-            <!-- RESULT STATS -->
+            <!-- RESULTS -->
 
             <div class="quick-result-stats">
 
@@ -222,7 +222,7 @@
 
 
 
-            <!-- BUTTONS -->
+            <!-- FINISH BUTTONS -->
 
             <div class="quick-finish-buttons">
 
@@ -258,6 +258,7 @@
 
 
         <div class="quick-game-card">
+
 
 
             <!-- ================================================= -->
@@ -349,7 +350,7 @@
 
 
             <!-- ================================================= -->
-            <!-- ANSWER OPTIONS -->
+            <!-- ANSWERS -->
             <!-- ================================================= -->
 
             {% if not answered %}
@@ -363,7 +364,6 @@
                 >
 
 
-
                     <!-- RECYCLE -->
 
                     <button
@@ -373,21 +373,17 @@
                         value="recycle"
                     >
 
-
                         <span class="option-icon">
                             ♻️
                         </span>
-
 
                         <span class="option-title">
                             TÁI CHẾ
                         </span>
 
-
                         <span class="option-description">
                             Nhựa · Giấy · Kim loại
                         </span>
-
 
                     </button>
 
@@ -402,21 +398,17 @@
                         value="organic"
                     >
 
-
                         <span class="option-icon">
                             🍎
                         </span>
-
 
                         <span class="option-title">
                             HỮU CƠ
                         </span>
 
-
                         <span class="option-description">
                             Thức ăn · Lá cây
                         </span>
-
 
                     </button>
 
@@ -431,21 +423,17 @@
                         value="dangerous"
                     >
 
-
                         <span class="option-icon">
                             ☣️
                         </span>
-
 
                         <span class="option-title">
                             NGUY HẠI
                         </span>
 
-
                         <span class="option-description">
                             Pin · Hóa chất
                         </span>
-
 
                     </button>
 
@@ -455,17 +443,17 @@
 
 
             <!-- ================================================= -->
-            <!-- RESULT -->
+            <!-- ANSWER RESULT -->
             <!-- ================================================= -->
 
             {% else %}
 
 
 
-                <!-- CORRECT -->
-
                 {% if is_correct %}
 
+
+                    <!-- CORRECT -->
 
                     <div class="quick-answer-result quick-correct">
 
@@ -492,10 +480,10 @@
 
 
 
-                <!-- WRONG -->
-
                 {% else %}
 
+
+                    <!-- WRONG -->
 
                     <div class="quick-answer-result quick-wrong">
 
@@ -525,7 +513,7 @@
 
 
 
-                <!-- NEXT QUESTION -->
+                <!-- NEXT -->
 
                 <a
                     class="quick-next-button"
@@ -590,9 +578,9 @@
 <script>
 
 
-    /* =========================
+    /* =====================================================
        TIMER SETTINGS
-       ========================= */
+       ===================================================== */
 
     const TIMER_DURATION = 10;
 
@@ -600,9 +588,9 @@
 
 
 
-    /* =========================
-       ELEMENTS
-       ========================= */
+    /* =====================================================
+       GET TIMER ELEMENTS
+       ===================================================== */
 
     const timerText =
         document.getElementById("timer-text");
@@ -613,9 +601,9 @@
 
 
 
-    /* =========================
+    /* =====================================================
        START TIMER
-       ========================= */
+       ===================================================== */
 
     const timerInterval = setInterval(function () {
 
@@ -626,7 +614,7 @@
 
 
 
-        /* Prevent negative numbers */
+        /* Don't allow negative time */
 
         if (timeLeft < 0) {
 
@@ -636,18 +624,18 @@
 
 
 
-        /* =========================
-           UPDATE TIMER TEXT
-           ========================= */
+        /* =================================================
+           UPDATE TIMER NUMBER
+           ================================================= */
 
         timerText.textContent =
             timeLeft.toFixed(1) + "s";
 
 
 
-        /* =========================
-           UPDATE TIMER BAR
-           ========================= */
+        /* =================================================
+           UPDATE TIMER BAR WIDTH
+           ================================================= */
 
         const percentage =
             (timeLeft / TIMER_DURATION) * 100;
@@ -658,78 +646,102 @@
 
 
 
-        /* =========================
+        /* =================================================
            GREEN
-           More than 5 seconds
-           ========================= */
+           ================================================= */
 
         if (timeLeft > 5) {
 
+
             timerBar.classList.remove(
                 "timer-warning"
             );
+
 
             timerBar.classList.remove(
                 "timer-danger"
             );
 
+
+            timerText.classList.remove(
+                "timer-warning-text"
+            );
+
+
             timerText.classList.remove(
                 "timer-danger-text"
             );
+
 
         }
 
 
 
-        /* =========================
+        /* =================================================
            YELLOW
-           5 seconds or less
-           ========================= */
+           ================================================= */
 
         else if (timeLeft > 3) {
 
+
             timerBar.classList.add(
                 "timer-warning"
             );
 
+
             timerBar.classList.remove(
                 "timer-danger"
             );
+
+
+            timerText.classList.add(
+                "timer-warning-text"
+            );
+
 
             timerText.classList.remove(
                 "timer-danger-text"
             );
 
+
         }
 
 
 
-        /* =========================
+        /* =================================================
            RED
-           3 seconds or less
-           ========================= */
+           ================================================= */
 
         else {
+
 
             timerBar.classList.remove(
                 "timer-warning"
             );
 
+
             timerBar.classList.add(
                 "timer-danger"
             );
+
+
+            timerText.classList.remove(
+                "timer-warning-text"
+            );
+
 
             timerText.classList.add(
                 "timer-danger-text"
             );
 
+
         }
 
 
 
-        /* =========================
+        /* =================================================
            TIME UP
-           ========================= */
+           ================================================= */
 
         if (timeLeft <= 0) {
 
@@ -756,6 +768,37 @@
 
 
     }, 100);
+
+
+
+    /* =====================================================
+       STOP TIMER IF PLAYER ANSWERS
+       ===================================================== */
+
+    const answerForm =
+        document.getElementById(
+            "quick-answer-form"
+        );
+
+
+    if (answerForm) {
+
+
+        answerForm.addEventListener(
+            "submit",
+            function () {
+
+
+                clearInterval(
+                    timerInterval
+                );
+
+
+            }
+        );
+
+
+    }
 
 
 </script>
