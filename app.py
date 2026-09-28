@@ -194,6 +194,11 @@ def set_name():
         None
     )
 
+    session.pop(
+        "quick_streak",
+        None
+    )
+
 
     return redirect(
         "/start_quiz"
@@ -339,6 +344,11 @@ def change_name():
         None
     )
 
+    session.pop(
+        "quick_streak",
+        None
+    )
+
 
     return redirect(
         "/start_quiz"
@@ -394,6 +404,11 @@ def switch_player():
 
     session.pop(
         "quick_answered",
+        None
+    )
+
+    session.pop(
+        "quick_streak",
         None
     )
 
@@ -904,548 +919,296 @@ def answer():
 # =========================================================
 
 QUICK_SORT_ITEMS = [
-
-    {
-        "name": "🥤 Chai nhựa",
-        "answer": "recycle"
-    },
-
-    {
-        "name": "🍎 Vỏ trái cây",
-        "answer": "organic"
-    },
-
-    {
-        "name": "🔋 Pin đã qua sử dụng",
-        "answer": "dangerous"
-    },
-
-    {
-        "name": "📄 Giấy vụn",
-        "answer": "recycle"
-    },
-
-    {
-        "name": "🥫 Lon nước ngọt",
-        "answer": "recycle"
-    },
-
-    {
-        "name": "🍌 Vỏ chuối",
-        "answer": "organic"
-    },
-
-    {
-        "name": "🧪 Chai hóa chất",
-        "answer": "dangerous"
-    },
-
-    {
-        "name": "🍚 Thức ăn thừa",
-        "answer": "organic"
-    },
-
-    {
-        "name": "🍾 Chai thủy tinh",
-        "answer": "recycle"
-    },
-
-    {
-        "name": "📰 Báo cũ",
-        "answer": "recycle"
-    },
-
-    {
-        "name": "☕ Bã cà phê",
-        "answer": "organic"
-    },
-
-    {
-        "name": "💊 Thuốc hết hạn",
-        "answer": "dangerous"
-    },
-
-    {
-        "name": "📦 Thùng carton",
-        "answer": "recycle"
-    },
-
-    {
-        "name": "🥬 Rau củ hỏng",
-        "answer": "organic"
-    },
-
-    {
-        "name": "💡 Bóng đèn hỏng",
-        "answer": "dangerous"
-    }
-
+    {"name": "🥤 Chai nhựa", "answer": "recycle"},
+    {"name": "🍎 Vỏ trái cây", "answer": "organic"},
+    {"name": "🔋 Pin đã qua sử dụng", "answer": "dangerous"},
+    {"name": "📄 Giấy vụn", "answer": "recycle"},
+    {"name": "🥫 Lon nước ngọt", "answer": "recycle"},
+    {"name": "🍌 Vỏ chuối", "answer": "organic"},
+    {"name": "🧪 Chai hóa chất", "answer": "dangerous"},
+    {"name": "🍚 Thức ăn thừa", "answer": "organic"},
+    {"name": "🍾 Chai thủy tinh", "answer": "recycle"},
+    {"name": "📰 Báo cũ", "answer": "recycle"},
+    {"name": "☕ Bã cà phê", "answer": "organic"},
+    {"name": "💊 Thuốc hết hạn", "answer": "dangerous"},
+    {"name": "📦 Thùng carton", "answer": "recycle"},
+    {"name": "🥬 Rau củ hỏng", "answer": "organic"},
+    {"name": "💡 Bóng đèn hỏng", "answer": "dangerous"}
 ]
 
+
+# =========================================================
+# QUICK SORT DATABASE UPGRADE
+# =========================================================
+
+def upgrade_quick_sort_database():
+    conn = get_db()
+    columns = conn.execute("PRAGMA table_info(players)").fetchall()
+    column_names = [column["name"] for column in columns]
+
+    if "quick_best_streak" not in column_names:
+        conn.execute("""
+            ALTER TABLE players
+            ADD COLUMN quick_best_streak INTEGER DEFAULT 0
+        """)
+
+    conn.commit()
+    conn.close()
+
+
+upgrade_quick_sort_database()
+
+
+def get_quick_best_streak(username):
+    conn = get_db()
+    player = conn.execute("""
+        SELECT quick_best_streak
+        FROM players
+        WHERE name = ?
+    """, (username,)).fetchone()
+    conn.close()
+
+    if not player:
+        return 0
+
+    return player["quick_best_streak"] or 0
+
+
+def get_quick_leaderboard():
+    conn = get_db()
+    players = conn.execute("""
+        SELECT name, quick_best_streak
+        FROM players
+        WHERE quick_best_streak > 0
+        ORDER BY quick_best_streak DESC, name ASC
+        LIMIT 10
+    """).fetchall()
+    conn.close()
+    return players
 
 
 # =========================================================
 # START QUICK SORT
 # =========================================================
 
-@app.route(
-    "/quick_sort"
-)
+@app.route("/quick_sort")
 def quick_sort():
-
-    username = session.get(
-        "player"
-    )
-
+    username = session.get("player")
 
     if not username:
-
         return redirect("/")
 
-
-    # Fresh game
-
     session["quick_score"] = 0
-
     session["quick_correct"] = 0
-
     session["quick_total"] = 0
-
-
-    # Question lock
-
+    session["quick_streak"] = 0
     session["quick_answered"] = False
 
-
-    item = random.choice(
-        QUICK_SORT_ITEMS
-    )
-
-
+    item = random.choice(QUICK_SORT_ITEMS)
     session["quick_item"] = item
 
-
     return render_template(
-
         "quick_sort.html",
-
         username=username,
-
         item=item,
-
         score=0,
-
         correct=0,
-
         total=0,
-
+        streak=0,
+        best_streak=get_quick_best_streak(username),
+        new_best=False,
+        leaderboard=get_quick_leaderboard(),
         answered=False,
-
+        timed_out=False,
         finished=False
-
     )
-
 
 
 # =========================================================
 # ANSWER QUICK SORT
 # =========================================================
 
-@app.route(
-    "/quick_sort_answer",
-    methods=["POST"]
-)
+@app.route("/quick_sort_answer", methods=["POST"])
 def quick_sort_answer():
-
-    username = session.get(
-        "player"
-    )
-
+    username = session.get("player")
 
     if not username:
-
         return redirect("/")
 
-
-    item = session.get(
-        "quick_item"
-    )
-
+    item = session.get("quick_item")
 
     if not item:
+        return redirect("/quick_sort")
 
-        return redirect(
-            "/quick_sort"
-        )
+    if session.get("quick_answered", False):
+        return redirect("/quick_sort_next")
 
+    selected_answer = request.form.get("answer")
+    correct_answer = item["answer"]
+    is_correct = selected_answer == correct_answer
 
-
-    # =====================================================
-    # PREVENT DOUBLE ANSWER
-    # =====================================================
-
-    if session.get(
-        "quick_answered",
-        False
-    ):
-
-        return redirect(
-            "/quick_sort_next"
-        )
-
-
-
-    selected_answer = request.form.get(
-        "answer"
-    )
-
-
-    correct_answer = item[
-        "answer"
-    ]
-
-
-    is_correct = (
-
-        selected_answer
-
-        == correct_answer
-
-    )
-
-
-
-    score = session.get(
-        "quick_score",
-        0
-    )
-
-
-    correct = session.get(
-        "quick_correct",
-        0
-    )
-
-
-    total = session.get(
-        "quick_total",
-        0
-    )
-
-
+    score = session.get("quick_score", 0)
+    correct = session.get("quick_correct", 0)
+    total = session.get("quick_total", 0)
+    streak = session.get("quick_streak", 0)
 
     total += 1
-
-
+    new_best = False
+    best_streak = get_quick_best_streak(username)
 
     if is_correct:
-
         score += 10
-
         correct += 1
+        streak += 1
 
+        if streak > best_streak:
+            best_streak = streak
+            new_best = True
 
+            conn = get_db()
+            conn.execute("""
+                UPDATE players
+                SET quick_best_streak = ?
+                WHERE name = ?
+            """, (best_streak, username))
+            conn.commit()
+            conn.close()
+    else:
+        streak = 0
 
     session["quick_score"] = score
-
     session["quick_correct"] = correct
-
     session["quick_total"] = total
-
-
-    # Lock current question
-
+    session["quick_streak"] = streak
     session["quick_answered"] = True
 
-
-
     return render_template(
-
         "quick_sort.html",
-
         username=username,
-
         item=item,
-
         selected_answer=selected_answer,
-
         is_correct=is_correct,
-
         timed_out=False,
-
         score=score,
-
         correct=correct,
-
         total=total,
-
+        streak=streak,
+        best_streak=best_streak,
+        new_best=new_best,
+        leaderboard=get_quick_leaderboard(),
         answered=True,
-
         finished=False
-
     )
-
 
 
 # =========================================================
 # ⏰ QUICK SORT TIMEOUT
 # =========================================================
 
-@app.route(
-    "/quick_sort_timeout",
-    methods=["POST"]
-)
+@app.route("/quick_sort_timeout", methods=["POST"])
 def quick_sort_timeout():
-
-    username = session.get(
-        "player"
-    )
-
+    username = session.get("player")
 
     if not username:
-
         return redirect("/")
 
-
-    item = session.get(
-        "quick_item"
-    )
-
+    item = session.get("quick_item")
 
     if not item:
+        return redirect("/quick_sort")
 
-        return redirect(
-            "/quick_sort"
-        )
+    if session.get("quick_answered", False):
+        return redirect("/quick_sort_next")
 
-
-
-    # =====================================================
-    # ALREADY ANSWERED?
-    # =====================================================
-
-    if session.get(
-        "quick_answered",
-        False
-    ):
-
-        return redirect(
-            "/quick_sort_next"
-        )
-
-
-
-    score = session.get(
-        "quick_score",
-        0
-    )
-
-
-    correct = session.get(
-        "quick_correct",
-        0
-    )
-
-
-    total = session.get(
-        "quick_total",
-        0
-    )
-
-
-
-    # Timeout counts as attempted/wrong
-
-    total += 1
-
+    score = session.get("quick_score", 0)
+    correct = session.get("quick_correct", 0)
+    total = session.get("quick_total", 0) + 1
 
     session["quick_total"] = total
-
-
-    # Lock the question
-
+    session["quick_streak"] = 0
     session["quick_answered"] = True
 
-
-
     return render_template(
-
         "quick_sort.html",
-
         username=username,
-
         item=item,
-
         selected_answer=None,
-
         is_correct=False,
-
         timed_out=True,
-
         score=score,
-
         correct=correct,
-
         total=total,
-
+        streak=0,
+        best_streak=get_quick_best_streak(username),
+        new_best=False,
+        leaderboard=get_quick_leaderboard(),
         answered=True,
-
         finished=False
-
     )
-
 
 
 # =========================================================
 # NEXT QUICK SORT ITEM
 # =========================================================
 
-@app.route(
-    "/quick_sort_next"
-)
+@app.route("/quick_sort_next")
 def quick_sort_next():
-
-    username = session.get(
-        "player"
-    )
-
+    username = session.get("player")
 
     if not username:
-
         return redirect("/")
 
-
-
-    old_item = session.get(
-        "quick_item"
-    )
-
-
-
-    # =====================================================
-    # AVOID IMMEDIATE REPEAT
-    # =====================================================
-
-    available_items = [
-
-        item
-
-        for item in QUICK_SORT_ITEMS
-
-        if item != old_item
-
-    ]
-
-
+    old_item = session.get("quick_item")
+    available_items = [item for item in QUICK_SORT_ITEMS if item != old_item]
 
     if available_items:
-
-        item = random.choice(
-            available_items
-        )
-
-
+        item = random.choice(available_items)
     else:
-
-        item = random.choice(
-            QUICK_SORT_ITEMS
-        )
-
-
+        item = random.choice(QUICK_SORT_ITEMS)
 
     session["quick_item"] = item
-
-
-    # New question = unlocked
-
     session["quick_answered"] = False
 
-
-
     return render_template(
-
         "quick_sort.html",
-
         username=username,
-
         item=item,
-
-        score=session.get(
-            "quick_score",
-            0
-        ),
-
-        correct=session.get(
-            "quick_correct",
-            0
-        ),
-
-        total=session.get(
-            "quick_total",
-            0
-        ),
-
+        score=session.get("quick_score", 0),
+        correct=session.get("quick_correct", 0),
+        total=session.get("quick_total", 0),
+        streak=session.get("quick_streak", 0),
+        best_streak=get_quick_best_streak(username),
+        new_best=False,
+        leaderboard=get_quick_leaderboard(),
         answered=False,
-
+        timed_out=False,
         finished=False
-
     )
-
 
 
 # =========================================================
 # FINISH QUICK SORT
 # =========================================================
 
-@app.route(
-    "/quick_sort_finish"
-)
+@app.route("/quick_sort_finish")
 def quick_sort_finish():
-
-    username = session.get(
-        "player"
-    )
-
+    username = session.get("player")
 
     if not username:
-
         return redirect("/")
 
-
-    score = session.get(
-        "quick_score",
-        0
-    )
-
-
-    correct = session.get(
-        "quick_correct",
-        0
-    )
-
-
-    total = session.get(
-        "quick_total",
-        0
-    )
-
-
     return render_template(
-
         "quick_sort.html",
-
         username=username,
-
-        score=score,
-
-        correct=correct,
-
-        total=total,
-
+        score=session.get("quick_score", 0),
+        correct=session.get("quick_correct", 0),
+        total=session.get("quick_total", 0),
+        streak=session.get("quick_streak", 0),
+        best_streak=get_quick_best_streak(username),
+        new_best=False,
+        leaderboard=get_quick_leaderboard(),
         finished=True
-
     )
-
 
 
 # =========================================================
