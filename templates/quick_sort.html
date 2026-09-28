@@ -2,7 +2,6 @@
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -16,183 +15,365 @@
         rel="stylesheet"
         href="/static/style.css"
     >
-
 </head>
 
 
-<body>
+<body class="quick-body">
 
 
-<div class="container">
+<div class="quick-container">
 
 
-    <!-- TITLE -->
+    <!-- ========================= -->
+    <!-- HEADER -->
+    <!-- ========================= -->
 
-    <h1>
-        ⚡ PHÂN LOẠI NHANH
-    </h1>
+    <div class="quick-header">
 
-    <p>
-        Phân loại rác thật nhanh và chính xác! ♻️
-    </p>
+        <div class="quick-mode-badge">
+            ⚡ SPEED MODE
+        </div>
 
-
-    <!-- PLAYER -->
-
-    <div class="name-box">
-
-        <h2>
-            👋 {{ username }}
-        </h2>
+        <h1>
+            PHÂN LOẠI NHANH
+        </h1>
 
         <p>
-            🌱 Điểm: <strong>{{ score }}</strong>
-            &nbsp; · &nbsp;
-            ✅ Đúng: <strong>{{ correct }}</strong>
+            Chọn đúng thùng rác nhanh nhất có thể! ♻️
         </p>
 
     </div>
 
 
+
+    <!-- ========================= -->
+    <!-- PLAYER STATS -->
+    <!-- ========================= -->
+
+    <div class="quick-stats">
+
+
+        <div class="quick-player">
+
+            <span class="quick-player-icon">
+                👋
+            </span>
+
+            <div>
+                <small>NGƯỜI CHƠI</small>
+
+                <strong>
+                    {{ username }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="quick-stat">
+
+            <span>
+                🌱
+            </span>
+
+            <div>
+                <small>ĐIỂM</small>
+
+                <strong>
+                    {{ score }}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="quick-stat">
+
+            <span>
+                ✅
+            </span>
+
+            <div>
+                <small>ĐÚNG</small>
+
+                <strong>
+                    {{ correct }}
+                </strong>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
     {% if finished %}
 
 
+        <!-- ========================= -->
         <!-- FINISHED -->
+        <!-- ========================= -->
 
-        <div class="leaderboard">
+        <div class="quick-game-card quick-finished">
+
+
+            <div class="quick-finish-icon">
+                🏆
+            </div>
+
 
             <h2>
-                🏆 Hoàn thành!
+                HOÀN THÀNH!
             </h2>
 
-            <p>
-                🌱 Điểm của bạn:
-                <strong>{{ score }}</strong>
-            </p>
 
             <p>
-                ✅ Số câu đúng:
-                <strong>{{ correct }}</strong>
-            </p>
-
-            <p>
-                📊 Tổng số câu:
-                <strong>{{ total }}</strong>
+                Bạn đã hoàn thành thử thách
+                <strong>Phân loại nhanh!</strong>
             </p>
 
 
-            <br>
+
+            <div class="quick-result-stats">
 
 
-            <a
-                class="back-button"
-                href="/quick_sort"
-            >
-                🔄 Chơi lại
-            </a>
+                <div>
+
+                    <span>
+                        🌱
+                    </span>
+
+                    <strong>
+                        {{ score }}
+                    </strong>
+
+                    <small>
+                        ĐIỂM
+                    </small>
+
+                </div>
 
 
-            <br>
-            <br>
+                <div>
+
+                    <span>
+                        ✅
+                    </span>
+
+                    <strong>
+                        {{ correct }}
+                    </strong>
+
+                    <small>
+                        CÂU ĐÚNG
+                    </small>
+
+                </div>
 
 
-            <a
-                class="back-button"
-                href="/"
-            >
-                🏠 Trang chủ
-            </a>
+                <div>
+
+                    <span>
+                        📊
+                    </span>
+
+                    <strong>
+                        {{ total }}
+                    </strong>
+
+                    <small>
+                        TỔNG CÂU
+                    </small>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="quick-finish-buttons">
+
+
+                <a
+                    class="quick-play-again"
+                    href="/quick_sort"
+                >
+                    🔄 CHƠI LẠI
+                </a>
+
+
+                <a
+                    class="quick-home-button"
+                    href="/"
+                >
+                    🏠 TRANG CHỦ
+                </a>
+
+
+            </div>
+
 
         </div>
+
 
 
     {% else %}
 
 
-        <!-- GAME -->
+        <!-- ========================= -->
+        <!-- GAME CARD -->
+        <!-- ========================= -->
 
-        <div class="leaderboard">
-
-
-            <h2>
-                🗑️ Bạn sẽ bỏ rác này vào đâu?
-            </h2>
+        <div class="quick-game-card">
 
 
+            <div class="quick-question-label">
+                🗑️ BẠN SẼ BỎ RÁC NÀY VÀO ĐÂU?
+            </div>
+
+
+
+            <!-- ========================= -->
             <!-- ITEM -->
+            <!-- ========================= -->
 
-            <div class="quick-item">
+            <div class="quick-trash-card">
 
-                <div class="quick-item-name">
 
-                    {{ item.name }}
-
+                <div class="quick-trash-icon">
+                    🗑️
                 </div>
 
+
+                <div class="quick-trash-name">
+                    {{ item.name }}
+                </div>
+
+
+                <div class="quick-trash-hint">
+                    Chọn loại rác phù hợp bên dưới
+                </div>
+
+
             </div>
+
 
 
             {% if not answered %}
 
 
+                <!-- ========================= -->
                 <!-- ANSWERS -->
+                <!-- ========================= -->
 
                 <form
+                    class="quick-options"
                     action="/quick_sort_answer"
                     method="POST"
                 >
 
 
                     <button
-                        class="quick-option"
+                        class="quick-option recycle-option"
                         type="submit"
                         name="answer"
                         value="recycle"
                     >
-                        ♻️ Rác tái chế
+
+                        <span class="option-icon">
+                            ♻️
+                        </span>
+
+                        <span class="option-title">
+                            TÁI CHẾ
+                        </span>
+
+                        <span class="option-description">
+                            Nhựa · Giấy · Kim loại
+                        </span>
+
                     </button>
 
 
+
                     <button
-                        class="quick-option"
+                        class="quick-option organic-option"
                         type="submit"
                         name="answer"
                         value="organic"
                     >
-                        🍎 Rác hữu cơ
+
+                        <span class="option-icon">
+                            🍎
+                        </span>
+
+                        <span class="option-title">
+                            HỮU CƠ
+                        </span>
+
+                        <span class="option-description">
+                            Thức ăn · Lá cây
+                        </span>
+
                     </button>
 
 
+
                     <button
-                        class="quick-option"
+                        class="quick-option dangerous-option"
                         type="submit"
                         name="answer"
                         value="dangerous"
                     >
-                        ☣️ Rác nguy hại
+
+                        <span class="option-icon">
+                            ☣️
+                        </span>
+
+                        <span class="option-title">
+                            NGUY HẠI
+                        </span>
+
+                        <span class="option-description">
+                            Pin · Hóa chất
+                        </span>
+
                     </button>
 
 
                 </form>
 
 
+
             {% else %}
 
 
+                <!-- ========================= -->
                 <!-- RESULT -->
+                <!-- ========================= -->
 
                 {% if is_correct %}
 
 
-                    <div class="correct-box">
+                    <div class="quick-answer-result quick-correct">
 
-                        <h2>
-                            ✅ CHÍNH XÁC!
-                        </h2>
+                        <div class="result-icon">
+                            ✅
+                        </div>
 
-                        <p>
-                            Quá ngon bro! +10 🌱
-                        </p>
+                        <div>
+
+                            <h2>
+                                CHÍNH XÁC!
+                            </h2>
+
+                            <p>
+                                Quá ngon bro! +10 🌱
+                            </p>
+
+                        </div>
 
                     </div>
 
@@ -200,15 +381,23 @@
                 {% else %}
 
 
-                    <div class="wrong-box">
+                    <div class="quick-answer-result quick-wrong">
 
-                        <h2>
-                            ❌ CHƯA ĐÚNG!
-                        </h2>
+                        <div class="result-icon">
+                            ❌
+                        </div>
 
-                        <p>
-                            Hãy nhớ phân loại rác đúng cách nhé!
-                        </p>
+                        <div>
+
+                            <h2>
+                                CHƯA ĐÚNG!
+                            </h2>
+
+                            <p>
+                                Hãy nhớ phân loại rác đúng cách nhé!
+                            </p>
+
+                        </div>
 
                     </div>
 
@@ -216,14 +405,13 @@
                 {% endif %}
 
 
-                <br>
-
 
                 <a
-                    class="back-button"
+                    class="quick-next-button"
                     href="/quick_sort_next"
                 >
-                    ➡️ Câu tiếp theo
+                    CÂU TIẾP THEO
+                    <span>➡️</span>
                 </a>
 
 
@@ -236,20 +424,26 @@
     {% endif %}
 
 
-    <!-- HOME -->
 
-    <p class="footer">
+    <!-- ========================= -->
+    <!-- FOOTER -->
+    <!-- ========================= -->
 
-        <a
-            href="/"
-            style="text-decoration: none;"
-        >
+    <div class="quick-footer">
+
+        <a href="/">
             🏠 Smart Trash
         </a>
 
-        · Vì một môi trường xanh hơn 🌱
+        <span>
+            ·
+        </span>
 
-    </p>
+        <span>
+            Vì một môi trường xanh hơn 🌱
+        </span>
+
+    </div>
 
 
 </div>
