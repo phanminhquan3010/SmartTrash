@@ -1228,3 +1228,137 @@ h2 {
     }
 
 }
+/* =========================================================
+   ⏱️ SMART TRASH - QUICK SORT TIMER
+   ========================================================= */
+
+
+.quick-timer {
+    margin-bottom: 25px;
+}
+
+
+/* TIMER TITLE */
+
+.quick-timer-info {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 9px;
+
+    color: #08752f;
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* TIMER NUMBER */
+
+#timer-text {
+
+    font-size: 19px;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+/* TIMER BACKGROUND */
+
+.quick-timer-track {
+
+    width: 100%;
+
+    height: 15px;
+
+    overflow: hidden;
+
+    background: #e1eee4;
+
+    border-radius: 50px;
+
+    box-shadow:
+
+        inset
+        0
+        2px
+        5px
+        rgba(0, 0, 0, 0.09);
+}
+
+
+/* TIMER BAR */
+
+.quick-timer-bar {
+
+    width: 100%;
+
+    height: 100%;
+
+    border-radius: 50px;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #22c55e,
+            #16a344
+        );
+
+    transition:
+
+        width 0.1s linear,
+
+        background 0.25s ease;
+}
+
+
+
+/* =========================================================
+   🟡 TIMER WARNING
+   ========================================================= */
+
+.quick-timer-bar.timer-warning {
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #facc15,
+            #f59e0b
+        );
+}
+
+
+
+/* =========================================================
+   🔴 TIMER DANGER
+   ========================================================= */
+
+.quick-timer-bar.timer-danger {
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #ef4444,
+            #dc2626
+        );
+}
+
+
+#timer-text.timer-danger-text {
+
+    color: #dc2626;
+
+    transform: scale(1.08);
+}
