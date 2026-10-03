@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect
 import sqlite3
 import random
 import os
+import json
 
 from questions import get_questions
 from generator import generate_questions
@@ -13,8 +14,9 @@ app.secret_key = "smart-trash-secret-key"
 
 
 QUESTIONS = get_questions()
-GENERATED_QUESTIONS = generate_questions(start_id=max((q["id"] for q in QUESTIONS), default=0) + 1)
-QUESTIONS.extend(GENERATED_QUESTIONS)
+# Generated questions are loaded from SQLite below so their IDs and choices
+# remain stable between server restarts.
+GENERATED_QUESTIONS = []
 
 QUESTIONS_PER_ROUND = 100
 
@@ -60,13 +62,53 @@ def init_db():
     """)
 
 
-    conn.commit()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS generated_questions (
+            id INTEGER PRIMARY KEY,
+            question TEXT UNIQUE NOT NULL,
+            options_json TEXT NOT NULL,
+            answer TEXT NOT NULL
+        )
+    """)
 
+    # Only insert new questions; never change the IDs of saved questions.
+    original_ids = [q["id"] for q in QUESTIONS]
+    first_id = max(original_ids, default=0) + 1
+    existing = conn.execute(
+        "SELECT id, question FROM generated_questions"
+    ).fetchall()
+    saved_texts = {row["question"] for row in existing}
+    next_id = max([first_id - 1] + [row["id"] for row in existing]) + 1
+
+    for q in generate_questions(start_id=first_id):
+        if q["question"] not in saved_texts:
+            conn.execute(
+                "INSERT INTO generated_questions (id, question, options_json, answer) VALUES (?, ?, ?, ?)",
+                (next_id, q["question"], json.dumps(q["options"], ensure_ascii=False), q["answer"])
+            )
+            saved_texts.add(q["question"])
+            next_id += 1
+
+    conn.commit()
     conn.close()
 
 
 
 init_db()
+
+def load_generated_questions():
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT id, question, options_json, answer FROM generated_questions ORDER BY id"
+    ).fetchall()
+    conn.close()
+    return [{"id": r["id"], "question": r["question"],
+             "options": json.loads(r["options_json"]), "answer": r["answer"]}
+            for r in rows]
+
+GENERATED_QUESTIONS = load_generated_questions()
+QUESTIONS.extend(GENERATED_QUESTIONS)
+QUESTION_BY_ID = {q["id"]: q for q in QUESTIONS}
 
 
 
@@ -546,35 +588,16 @@ def quiz():
 
 
     if not round_questions:
-
-        all_ids = [
-
-            q["id"]
-
-            for q in QUESTIONS
-
-        ]
-
-
-        if len(all_ids) > QUESTIONS_PER_ROUND:
-
-            round_questions = random.sample(
-
-                all_ids,
-
-                QUESTIONS_PER_ROUND
-
-            )
-
-
-        else:
-
-            round_questions = all_ids[:]
-
-            random.shuffle(
-                round_questions
-            )
-
+        unseen = [q["id"] for q in QUESTIONS if q["id"] not in answered_ids]
+        if not unseen:
+            # Every question was answered: start a fresh learning cycle.
+            conn = get_db()
+            conn.execute("DELETE FROM answered_questions WHERE player_name = ?", (player,))
+            conn.commit()
+            conn.close()
+            answered_ids = set()
+            unseen = [q["id"] for q in QUESTIONS]
+        round_questions = random.sample(unseen, min(len(unseen), QUESTIONS_PER_ROUND))
 
         session["round_questions"] = (
             round_questions
@@ -643,15 +666,7 @@ def quiz():
     next_id = available_ids[0]
 
 
-    question = next(
-
-        q
-
-        for q in QUESTIONS
-
-        if q["id"] == next_id
-
-    )
+    question = QUESTION_BY_ID[next_id]
 
 
     session["current_question"] = (
