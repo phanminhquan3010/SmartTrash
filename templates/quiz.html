@@ -1,252 +1,123 @@
-<!DOCTYPE html>
+A<!DOCTYPE html>
 <html lang="vi">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Trash Quiz</title>
-
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
-
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-
-
 <body>
-
-
 <div class="container">
-
-
-    <!-- ========================= -->
-    <!-- FINISHED -->
-    <!-- ========================= -->
+    <button type="button" id="sound-toggle" aria-label="Bật hoặc tắt âm thanh" aria-pressed="true" style="float:right;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:#e8f5e9;color:#1b5e20;font-size:18px">🔊</button>
 
     {% if finished %}
-
-        <h1>
-            🎉 Hoàn thành!
-        </h1>
-
-        <p>
-            Bạn đã hoàn thành {{ total }} câu hỏi!
-        </p>
-
-
+        <h1>🎉 Hoàn thành!</h1>
+        <p>Bạn đã hoàn thành {{ total }} câu hỏi!</p>
         <div class="name-box">
-
-            <h2>
-                ⭐ Điểm: {{ score }}
-            </h2>
-
-            <p>
-                ✅ Số câu đúng: {{ correct }}
-            </p>
-
+            <h2>⭐ Điểm: {{ score }}</h2>
+            <p>✅ Số câu đúng: {{ correct }}</p>
         </div>
-
-
         <br>
-
-
-        <a
-            class="back-button"
-            href="/start_quiz"
-        >
-            🔄 Chơi lại
-        </a>
-
-
-        <br>
-        <br>
-
-
-        <a
-            class="back-button"
-            href="/"
-        >
-            🏠 Về trang chủ
-        </a>
-
-
+        <a class="back-button" href="/start_quiz">🔄 Chơi lại</a>
+        <br><br>
+        <a class="back-button" href="/">🏠 Về trang chủ</a>
     {% else %}
-
-
-        <!-- ========================= -->
-        <!-- QUIZ HEADER -->
-        <!-- ========================= -->
-
-        <h1>
-            🗑️ SMART TRASH
-        </h1>
-
-        <p>
-            Phân loại rác thông minh ♻️
-        </p>
-
-
-        <!-- ========================= -->
-        <!-- PROGRESS -->
-        <!-- ========================= -->
-
+        <h1>🗑️ SMART TRASH</h1>
+        <p>Phân loại rác thông minh ♻️</p>
         <div class="name-box">
-
-            <h2>
-                Câu {{ question_number }}/{{ total_questions }}
-            </h2>
-
-            <p>
-                ⭐ Điểm:
-                <strong>{{ score }}</strong>
-            </p>
-
-            <p>
-                ✅ Đúng:
-                <strong>{{ correct }}</strong>
-            </p>
-
+            <h2>Câu {{ question_number }}/{{ total_questions }}</h2>
+            <p>⭐ Điểm: <strong>{{ score }}</strong></p>
+            <p>✅ Đúng: <strong>{{ correct }}</strong></p>
         </div>
-
-
         <br>
-
-
-        <!-- ========================= -->
-        <!-- QUESTION -->
-        <!-- ========================= -->
-
         <div class="leaderboard">
-
-
-            <h2>
-                {{ question.question }}
-            </h2>
-
-
+            <h2>{{ question.question }}</h2>
             {% if not answered %}
-
-
-                <!-- ========================= -->
-                <!-- ANSWERS -->
-                <!-- ========================= -->
-
-                <form
-                    action="/answer"
-                    method="POST"
-                >
-
-
+                <form action="/answer" method="POST">
                     {% for option in question.options %}
-
-                        <button
-                            type="submit"
-                            name="answer"
-                            value="{{ option }}"
-                            class="quiz-option"
-                        >
-
-                            {{ option }}
-
-                        </button>
-
+                        <button type="submit" name="answer" value="{{ option }}" class="quiz-option">{{ option }}</button>
                     {% endfor %}
-
-
                 </form>
-
-
             {% else %}
-
-
-                <!-- ========================= -->
-                <!-- RESULT -->
-                <!-- ========================= -->
-
                 {% if is_correct %}
-
                     <div class="correct-box">
-
-                        <h2>
-                            🎉 Chính xác!
-                        </h2>
-
-                        <p>
-                            Bạn nhận được
-                            <strong>10 điểm</strong>!
-                        </p>
-
+                        <h2>🎉 Chính xác!</h2>
+                        <p>Bạn nhận được <strong>10 điểm</strong>!</p>
                     </div>
-
-
                 {% else %}
-
                     <div class="wrong-box">
-
-                        <h2>
-                            ❌ Chưa chính xác!
-                        </h2>
-
-                        <p>
-                            Đáp án đúng là:
-                        </p>
-
-                        <strong>
-                            {{ question.answer }}
-                        </strong>
-
+                        <h2>❌ Chưa chính xác!</h2>
+                        <p>Đáp án đúng là:</p>
+                        <strong>{{ question.answer }}</strong>
                     </div>
-
                 {% endif %}
-
-
                 <br>
-
-
-                <!-- ========================= -->
-                <!-- NEXT -->
-                <!-- ========================= -->
-
-                <a
-                    class="back-button"
-                    href="/quiz"
-                >
-
-                    ➡️ Câu tiếp theo
-
-                </a>
-
-
+                <a class="back-button" href="/quiz">➡️ Câu tiếp theo</a>
             {% endif %}
-
-
         </div>
-
-
     {% endif %}
-
-
-    <!-- ========================= -->
-    <!-- FOOTER -->
-    <!-- ========================= -->
-
-    <p class="footer">
-
-        ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
-
-    </p>
-
-
+    <p class="footer">♻️ Smart Trash · Vì một môi trường xanh hơn 🌱</p>
 </div>
 
+<script>
+(() => {
+    const toggle = document.getElementById('sound-toggle');
+    let enabled = localStorage.getItem('smarttrash_sound') !== 'off';
+    let audioContext;
+    function updateToggle() {
+        toggle.textContent = enabled ? '🔊' : '🔇';
+        toggle.setAttribute('aria-pressed', String(enabled));
+        toggle.title = enabled ? 'Tắt âm thanh' : 'Bật âm thanh';
+    }
+    function tone(frequency, start, duration, type = 'sine', volume = 0.10) {
+        if (!enabled) return;
+        try {
+            const Context = window.AudioContext || window.webkitAudioContext;
+            if (!Context) return;
+            audioContext ||= new Context();
+            if (audioContext.state === 'suspended') audioContext.resume();
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + start);
+            gain.gain.setValueAtTime(0.0001, audioContext.currentTime + start);
+            gain.gain.exponentialRampToValueAtTime(volume, audioContext.currentTime + start + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + start + duration);
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+            oscillator.start(audioContext.currentTime + start);
+            oscillator.stop(audioContext.currentTime + start + duration + 0.02);
+        } catch (error) {
+            console.debug('Sound unavailable:', error);
+        }
+    }
+    function playResult(kind) {
+        if (kind === 'correct') {
+            tone(523.25, 0, 0.13);
+            tone(659.25, 0.12, 0.13);
+            tone(783.99, 0.24, 0.22);
+        } else if (kind === 'wrong') {
+            tone(330, 0, 0.17, 'triangle', 0.07);
+            tone(261.63, 0.17, 0.24, 'triangle', 0.07);
+        } else if (kind === 'finished') {
+            [523.25, 659.25, 783.99, 1046.5].forEach((note, i) => tone(note, i * 0.14, 0.26));
+        }
+    }
+    toggle.addEventListener('click', () => {
+        enabled = !enabled;
+        localStorage.setItem('smarttrash_sound', enabled ? 'on' : 'off');
+        updateToggle();
+        if (enabled) tone(659.25, 0, 0.12);
+    });
+    updateToggle();
 
+    // Browsers may block sound until a user interacts with the page.
+    const result = {% if finished %}'finished'{% elif answered %}{% if is_correct %}'correct'{% else %}'wrong'{% endif %}{% else %}null{% endif %};
+    if (result) {
+        // A form submission usually follows a user gesture, but autoplay rules vary.
+        playResult(result);
+    }
+})();
+</script>
 </body>
-
 </html>
