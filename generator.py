@@ -1,18 +1,39 @@
 import random
 
 TRASH_DATA = {
+    # Rác tái chế
     "Chai nhựa sạch": "Rác tái chế ♻️",
     "Lon nhôm": "Rác tái chế ♻️",
     "Giấy sạch": "Rác tái chế ♻️",
     "Thùng carton sạch": "Rác tái chế ♻️",
+    "Chai thủy tinh nguyên vẹn": "Rác tái chế ♻️",
+    "Hộp giấy sạch": "Rác tái chế ♻️",
+    "Lon thép sạch": "Rác tái chế ♻️",
+    "Sách báo cũ": "Rác tái chế ♻️",
+
+    # Rác hữu cơ
     "Vỏ chuối": "Rác hữu cơ 🌱",
     "Vỏ cam": "Rác hữu cơ 🌱",
     "Lá cây": "Rác hữu cơ 🌱",
     "Bã cà phê": "Rác hữu cơ 🌱",
+    "Vỏ trứng": "Rác hữu cơ 🌱",
+    "Rau củ hỏng": "Rác hữu cơ 🌱",
+    "Vỏ khoai tây": "Rác hữu cơ 🌱",
+    "Bã trà": "Rác hữu cơ 🌱",
+
+    # Rác nguy hại
     "Pin đã sử dụng": "Rác nguy hại 🔋",
     "Thuốc hết hạn": "Rác nguy hại 🔋",
+    "Bình chứa hóa chất còn dư": "Rác nguy hại 🔋",
+    "Bóng đèn huỳnh quang hỏng": "Rác nguy hại 🔋",
+
+    # Rác điện tử
     "Điện thoại hỏng": "Rác điện tử 💻",
-    "Bàn phím hỏng": "Rác điện tử 💻"
+    "Bàn phím hỏng": "Rác điện tử 💻",
+    "Chuột máy tính hỏng": "Rác điện tử 💻",
+    "Máy tính bảng hỏng": "Rác điện tử 💻",
+    "Bộ sạc điện thoại hỏng": "Rác điện tử 💻",
+    "Tai nghe hỏng": "Rác điện tử 💻"
 }
 
 CATEGORIES = list(dict.fromkeys(TRASH_DATA.values()))
@@ -59,15 +80,24 @@ def generate_questions(start_id=1000):
             add(template.format(item=item), answer, CATEGORIES)
 
     for category in CATEGORIES:
-        correct_items = [item for item, value in TRASH_DATA.items() if value == category]
-        incorrect_items = [item for item, value in TRASH_DATA.items() if value != category]
-        for template in [
-            "Vật nào sau đây thuộc nhóm {category}?",
-            "Trong các vật sau, đâu là ví dụ của {category}?"
-        ]:
-            item = random.choice(correct_items)
-            wrong = random.sample(incorrect_items, 3)
-            add(template.format(category=category), item, [item] + wrong)
+    correct_items = [
+        item for item, value in TRASH_DATA.items()
+        if value == category
+    ]
+
+    incorrect_items = [
+        item for item, value in TRASH_DATA.items()
+        if value != category
+    ]
+
+    for item in correct_items:
+        wrong = random.sample(incorrect_items, 3)
+
+        add(
+            f"Vật nào thuộc nhóm {category}?",
+            item,
+            [item] + wrong
+        )
 
     for item, correct, wrong in ACTIONS:
         add(f"Cách xử lý phù hợp với {item} là gì?", correct, [correct] + wrong)
