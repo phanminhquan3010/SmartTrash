@@ -557,28 +557,17 @@ def quiz():
     }
 
 
-   player_data = conn.execute("""
-    SELECT score, items
-    FROM players
-    WHERE name = ?
-""", (player,)).fetchone()
+    player_data = conn.execute("""
+        SELECT score, items
+        FROM players
+        WHERE name = ?
+    """, (player,)).fetchone()
 
-conn.close()
+    conn.close()
 
-if player_data is None:
-    session.clear()
-    return redirect("/")
-
-
-    if not player_data:
-
-        session.pop(
-            "player",
-            None
-        )
-
+    if player_data is None:
+        session.clear()
         return redirect("/")
-
 
 
     # =====================================================
