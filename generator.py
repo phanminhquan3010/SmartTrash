@@ -1,4 +1,3 @@
-
 import random
 
 TRASH_DATA = {
@@ -16,13 +15,7 @@ TRASH_DATA = {
     "Bàn phím hỏng": "Rác điện tử 💻"
 }
 
-CATEGORIES = [
-    "Rác tái chế ♻️",
-    "Rác hữu cơ 🌱",
-    "Rác nguy hại 🔋",
-    "Rác điện tử 💻"
-]
-
+CATEGORIES = ["Rác tái chế ♻️", "Rác hữu cơ 🌱", "Rác nguy hại 🔋", "Rác điện tử 💻"]
 TEMPLATES = [
     "{item} thuộc nhóm rác nào?",
     "Nên phân loại {item} vào nhóm nào?",
@@ -30,25 +23,17 @@ TEMPLATES = [
     "Đâu là nhóm rác phù hợp với {item}?"
 ]
 
-
 def generate_questions(start_id=1000):
     questions = []
-    question_id = start_id
-
     for item, answer in TRASH_DATA.items():
         for template in TEMPLATES:
             options = CATEGORIES.copy()
             random.shuffle(options)
-
             questions.append({
-                "id": question_id,
+                "id": start_id + len(questions),
                 "question": template.format(item=item),
                 "options": options,
                 "answer": answer
             })
-
-            question_id += 1
-
     random.shuffle(questions)
-
     return questions
