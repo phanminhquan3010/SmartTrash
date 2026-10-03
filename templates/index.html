@@ -24,20 +24,19 @@
 
     <!-- MUSIC CONTROLS -->
 
-    <div
-        style="
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        "
-    >
+    <div style="
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    ">
 
         <button
             type="button"
             id="music-toggle"
+            aria-pressed="false"
             style="
                 cursor: pointer;
                 border: 0;
@@ -51,10 +50,7 @@
             🎵 Bật nhạc
         </button>
 
-        <label
-            for="music-volume"
-            style="font-size: 14px;"
-        >
+        <label for="music-volume">
             🔉
         </label>
 
@@ -63,9 +59,9 @@
             id="music-volume"
             min="0"
             max="100"
-            value="20"
-            style="width: 90px;"
+            value="40"
             aria-label="Âm lượng nhạc nền"
+            style="width: 100px;"
         >
 
     </div>
@@ -161,7 +157,6 @@
                 </button>
 
             </form>
-
 
         {% else %}
 
@@ -294,7 +289,7 @@
 </div>
 
 
-<!-- FOREST AMBIENT MUSIC -->
+<!-- BACKGROUND MUSIC SYSTEM -->
 
 <script>
 
@@ -303,15 +298,25 @@
     const toggle =
         document.getElementById("music-toggle");
 
-    const volumeSlider =
+    const slider =
         document.getElementById("music-volume");
+
+    const AudioContextClass =
+        window.AudioContext ||
+        window.webkitAudioContext;
 
     let enabled =
         localStorage.getItem("smarttrash_music") === "on";
 
     let volume = Number(
-        localStorage.getItem("smarttrash_music_volume") ?? 20
+        localStorage.getItem(
+            "smarttrash_music_volume"
+        ) ?? 40
     );
+
+    if (!Number.isFinite(volume)) {
+        volume = 40;
+    }
 
     volume = Math.max(
         0,
@@ -322,14 +327,14 @@
 
     let masterGain = null;
 
-    let musicTimer = null;
+    let timer = null;
 
     let nextNoteTime = 0;
 
     let step = 0;
 
 
-    // SOFT FOREST-INSPIRED MELODY
+    // ORIGINAL FOREST MELODY
 
     const melody = [
 
@@ -356,29 +361,34 @@
     ];
 
 
-    // CREATE AUDIO SYSTEM
+    // BASS NOTES
+
+    const bass = [
+
+        130.81,
+        110.00,
+        87.31,
+        98.00
+
+    ];
+
+
+    // CREATE AUDIO
 
     function createAudio() {
 
-        if (audioContext) {
+        if (audioContext || !AudioContextClass) {
             return;
         }
 
-        const Context =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        if (!Context) {
-            return;
-        }
-
-        audioContext = new Context();
+        audioContext =
+            new AudioContextClass();
 
         masterGain =
             audioContext.createGain();
 
         masterGain.gain.value =
-            volume / 100 * 0.15;
+            volume / 100 * 0.5;
 
         masterGain.connect(
             audioContext.destination
@@ -387,13 +397,13 @@
     }
 
 
-    // PLAY A SOFT NOTE
+    // PLAY ONE NOTE
 
     function playNote(
         frequency,
-        time,
+        startTime,
         duration,
-        level = 0.3
+        strength
     ) {
 
         if (!audioContext || !frequency) {
@@ -406,42 +416,52 @@
         const gain =
             audioContext.createGain();
 
-        oscillator.type = "sine";
+        oscillator.type = "triangle";
 
         oscillator.frequency.setValueAtTime(
             frequency,
-            time
+            startTime
         );
 
         gain.gain.setValueAtTime(
             0.0001,
-            time
+            startTime
         );
 
         gain.gain.exponentialRampToValueAtTime(
-            level,
-            time + 0.08
+            strength,
+            startTime + 0.04
         );
 
         gain.gain.exponentialRampToValueAtTime(
             0.0001,
-            time + duration
+            startTime + duration
         );
 
         oscillator.connect(gain);
 
         gain.connect(masterGain);
 
-        oscillator.start(time);
+        oscillator.start(
+            startTime
+        );
 
         oscillator.stop(
-            time + duration + 0.02
+            startTime + duration + 0.02
         );
+
+        oscillator.onended = () => {
+
+            oscillator.disconnect();
+
+            gain.disconnect();
+
+        };
 
     }
 
 
-    // SCHEDULE MUSIC
+    // MUSIC SCHEDULER
 
     function scheduleMusic() {
 
@@ -453,11 +473,11 @@
             return;
         }
 
-        const beat = 0.42;
+        const beat = 0.48;
 
         while (
             nextNoteTime <
-            audioContext.currentTime + 0.2
+            audioContext.currentTime + 0.15
         ) {
 
             const note =
@@ -470,48 +490,26 @@
                 playNote(
                     note,
                     nextNoteTime,
-                    0.65,
-                    0.35
+                    0.38,
+                    0.45
                 );
 
             }
 
 
-            // QUIET LOW NOTES
+            // BASS EVERY FOUR BEATS
 
             if (step % 4 === 0) {
 
-                const bassNotes = [
-                    130.81,
-                    110.00,
-                    87.31,
-                    98.00
-                ];
-
                 const bassIndex =
-                    Math.floor(
-                        step / 4
-                    ) % bassNotes.length;
+                    Math.floor(step / 4) %
+                    bass.length;
 
                 playNote(
-                    bassNotes[bassIndex],
+                    bass[bassIndex],
                     nextNoteTime,
-                    1.4,
-                    0.18
-                );
-
-            }
-
-
-            // SOFT HIGH SPARKLE
-
-            if (step % 8 === 6) {
-
-                playNote(
-                    783.99,
-                    nextNoteTime,
-                    0.9,
-                    0.08
+                    1.1,
+                    0.20
                 );
 
             }
@@ -529,6 +527,10 @@
 
     async function startMusic() {
 
+        if (timer !== null) {
+            return;
+        }
+
         createAudio();
 
         if (!audioContext) {
@@ -539,22 +541,14 @@
 
             await audioContext.resume();
 
-            if (!enabled) {
+            if (!enabled || timer !== null) {
                 return;
             }
 
             nextNoteTime =
                 audioContext.currentTime + 0.05;
 
-            if (musicTimer !== null) {
-
-                clearInterval(
-                    musicTimer
-                );
-
-            }
-
-            musicTimer = setInterval(
+            timer = setInterval(
                 scheduleMusic,
                 100
             );
@@ -577,22 +571,41 @@
 
     function stopMusic() {
 
-        if (musicTimer !== null) {
+        if (timer !== null) {
 
-            clearInterval(
-                musicTimer
-            );
+            clearInterval(timer);
 
-            musicTimer = null;
+            timer = null;
 
         }
 
-        if (
-            audioContext &&
-            audioContext.state === "running"
-        ) {
+        if (audioContext) {
 
-            audioContext.suspend();
+            masterGain.gain.value = 0;
+
+            if (
+                audioContext.state === "running"
+            ) {
+
+                audioContext.suspend();
+
+            }
+
+        }
+
+    }
+
+
+    // UPDATE VOLUME
+
+    function updateVolume() {
+
+        if (masterGain) {
+
+            masterGain.gain.value =
+                enabled
+                    ? volume / 100 * 0.5
+                    : 0;
 
         }
 
@@ -615,7 +628,7 @@
     }
 
 
-    // TOGGLE MUSIC
+    // MUSIC BUTTON
 
     toggle.addEventListener(
         "click",
@@ -632,6 +645,8 @@
 
             if (enabled) {
 
+                updateVolume();
+
                 startMusic();
 
             } else {
@@ -644,16 +659,16 @@
     );
 
 
-    // VOLUME CONTROL
+    // VOLUME SLIDER
 
-    volumeSlider.value = volume;
+    slider.value = volume;
 
-    volumeSlider.addEventListener(
+    slider.addEventListener(
         "input",
         () => {
 
             volume = Number(
-                volumeSlider.value
+                slider.value
             );
 
             localStorage.setItem(
@@ -661,31 +676,28 @@
                 String(volume)
             );
 
-            if (masterGain) {
-
-                masterGain.gain.value =
-                    volume / 100 * 0.15;
-
-            }
+            updateVolume();
 
         }
     );
 
 
-    // RESTORE SAVED PREFERENCE
+    // INITIAL SETTINGS
 
     updateButton();
 
-    // Browsers may require a user interaction
-    // before allowing music to play.
+    // If music was previously enabled,
+    // resume after the next user interaction.
 
     if (enabled) {
 
         document.addEventListener(
-            "click",
-            function resumeMusic() {
+            "pointerdown",
+            () => {
 
                 if (enabled) {
+
+                    updateVolume();
 
                     startMusic();
 
