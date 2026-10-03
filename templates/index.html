@@ -1,8 +1,8 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -16,14 +16,59 @@
         rel="stylesheet"
         href="/static/style.css"
     >
-
 </head>
-
 
 <body>
 
-
 <div class="container">
+
+    <!-- MUSIC CONTROLS -->
+
+    <div
+        style="
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        "
+    >
+
+        <button
+            type="button"
+            id="music-toggle"
+            style="
+                cursor: pointer;
+                border: 0;
+                border-radius: 10px;
+                padding: 10px 14px;
+                background: #e8f5e9;
+                color: #1b5e20;
+                font-size: 16px;
+            "
+        >
+            🎵 Bật nhạc
+        </button>
+
+        <label
+            for="music-volume"
+            style="font-size: 14px;"
+        >
+            🔉
+        </label>
+
+        <input
+            type="range"
+            id="music-volume"
+            min="0"
+            max="100"
+            value="20"
+            style="width: 90px;"
+            aria-label="Âm lượng nhạc nền"
+        >
+
+    </div>
 
 
     <!-- TITLE -->
@@ -41,14 +86,11 @@
 
     <div class="name-box">
 
-
         {% if username %}
-
 
             <h2>
                 👋 Xin chào, {{ username }}!
             </h2>
-
 
             <p>
                 Sẵn sàng thử thách kiến thức môi trường?
@@ -57,33 +99,33 @@
 
             <!-- GAME MODES -->
 
-<h2>
-    🎮 Chọn chế độ chơi
-</h2>
+            <h2>
+                🎮 Chọn chế độ chơi
+            </h2>
 
-<p>
-    Hãy chọn thử thách của bạn!
-</p>
+            <p>
+                Hãy chọn thử thách của bạn!
+            </p>
 
-<a
-    class="back-button"
-    href="/start_quiz"
->
-    🧠 Quiz kiến thức
-</a>
+            <a
+                class="back-button"
+                href="/start_quiz"
+            >
+                🧠 Quiz kiến thức
+            </a>
 
-<br>
-<br>
+            <br>
+            <br>
 
-<a
-    class="back-button"
-    href="/quick_sort"
->
-    ⚡ Phân loại nhanh
-</a>
+            <a
+                class="back-button"
+                href="/quick_sort"
+            >
+                ⚡ Phân loại nhanh
+            </a>
 
-<br>
-<br>
+            <br>
+            <br>
 
 
             <!-- SWITCH PLAYER -->
@@ -94,7 +136,6 @@
             >
                 👤 Đổi người chơi
             </a>
-
 
             <br>
             <br>
@@ -124,11 +165,9 @@
 
         {% else %}
 
-
             <h2>
                 👤 Nhập tên của bạn
             </h2>
-
 
             <form
                 action="/set_name"
@@ -143,16 +182,13 @@
                     required
                 >
 
-
                 <button type="submit">
                     🚀 Bắt đầu
                 </button>
 
             </form>
 
-
         {% endif %}
-
 
     </div>
 
@@ -161,103 +197,90 @@
 
     <div class="leaderboard">
 
-
         <h2>
             🏆 TOP PLAYERS
         </h2>
-
 
         <p class="leaderboard-subtitle">
             🌱 Ai sẽ trở thành Eco Champion?
         </p>
 
-
         {% if players %}
-
 
             {% for player in players %}
 
+                <div
+                    class="
+                        player
+                        {% if player['name'] == username %}
+                            current-player
+                        {% endif %}
+                    "
+                >
 
-            <div
-                class="
-                    player
-                    {% if player['name'] == username %}
-                        current-player
-                    {% endif %}
-                "
-            >
+                    <!-- RANK -->
 
+                    <span class="rank">
 
-                <!-- RANK -->
+                        {% if loop.index == 1 %}
 
-                <span class="rank">
+                            🥇
 
-                    {% if loop.index == 1 %}
+                        {% elif loop.index == 2 %}
 
-                        🥇
+                            🥈
 
-                    {% elif loop.index == 2 %}
+                        {% elif loop.index == 3 %}
 
-                        🥈
+                            🥉
 
-                    {% elif loop.index == 3 %}
+                        {% else %}
 
-                        🥉
+                            #{{ loop.index }}
 
-                    {% else %}
+                        {% endif %}
 
-                        #{{ loop.index }}
-
-                    {% endif %}
-
-                </span>
+                    </span>
 
 
-                <!-- NAME -->
+                    <!-- NAME -->
 
-                <span class="player-name">
+                    <span class="player-name">
 
-                    {{ player["name"] }}
+                        {{ player["name"] }}
 
+                        {% if player["name"] == username %}
 
-                    {% if player["name"] == username %}
+                            ⭐ Bạn
 
-                        ⭐ Bạn
+                        {% endif %}
 
-                    {% endif %}
-
-                </span>
-
-
-                <!-- SCORE -->
-
-                <span class="player-score">
-
-                    🌱 {{ player["score"] }}
-
-                    <small>
-                        · ♻️ {{ player["items"] }}
-                    </small>
-
-                </span>
+                    </span>
 
 
-            </div>
+                    <!-- SCORE -->
 
+                    <span class="player-score">
+
+                        🌱 {{ player["score"] }}
+
+                        <small>
+                            · ♻️ {{ player["items"] }}
+                        </small>
+
+                    </span>
+
+                </div>
 
             {% endfor %}
 
-
         {% else %}
-
 
             <p>
                 🌱 Chưa có người chơi nào.
             </p>
 
-
         {% endif %}
-
 
     </div>
 
@@ -265,14 +288,418 @@
     <!-- FOOTER -->
 
     <p class="footer">
-
         ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
-
     </p>
-
 
 </div>
 
+
+<!-- FOREST AMBIENT MUSIC -->
+
+<script>
+
+(() => {
+
+    const toggle =
+        document.getElementById("music-toggle");
+
+    const volumeSlider =
+        document.getElementById("music-volume");
+
+    let enabled =
+        localStorage.getItem("smarttrash_music") === "on";
+
+    let volume = Number(
+        localStorage.getItem("smarttrash_music_volume") ?? 20
+    );
+
+    volume = Math.max(
+        0,
+        Math.min(100, volume)
+    );
+
+    let audioContext = null;
+
+    let masterGain = null;
+
+    let musicTimer = null;
+
+    let nextNoteTime = 0;
+
+    let step = 0;
+
+
+    // SOFT FOREST-INSPIRED MELODY
+
+    const melody = [
+
+        392.00,
+        440.00,
+        523.25,
+        440.00,
+
+        392.00,
+        329.63,
+        349.23,
+        392.00,
+
+        440.00,
+        392.00,
+        329.63,
+        293.66,
+
+        329.63,
+        349.23,
+        392.00,
+        0
+
+    ];
+
+
+    // CREATE AUDIO SYSTEM
+
+    function createAudio() {
+
+        if (audioContext) {
+            return;
+        }
+
+        const Context =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if (!Context) {
+            return;
+        }
+
+        audioContext = new Context();
+
+        masterGain =
+            audioContext.createGain();
+
+        masterGain.gain.value =
+            volume / 100 * 0.15;
+
+        masterGain.connect(
+            audioContext.destination
+        );
+
+    }
+
+
+    // PLAY A SOFT NOTE
+
+    function playNote(
+        frequency,
+        time,
+        duration,
+        level = 0.3
+    ) {
+
+        if (!audioContext || !frequency) {
+            return;
+        }
+
+        const oscillator =
+            audioContext.createOscillator();
+
+        const gain =
+            audioContext.createGain();
+
+        oscillator.type = "sine";
+
+        oscillator.frequency.setValueAtTime(
+            frequency,
+            time
+        );
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            time
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            level,
+            time + 0.08
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            time + duration
+        );
+
+        oscillator.connect(gain);
+
+        gain.connect(masterGain);
+
+        oscillator.start(time);
+
+        oscillator.stop(
+            time + duration + 0.02
+        );
+
+    }
+
+
+    // SCHEDULE MUSIC
+
+    function scheduleMusic() {
+
+        if (
+            !enabled ||
+            !audioContext ||
+            audioContext.state !== "running"
+        ) {
+            return;
+        }
+
+        const beat = 0.42;
+
+        while (
+            nextNoteTime <
+            audioContext.currentTime + 0.2
+        ) {
+
+            const note =
+                melody[step % melody.length];
+
+            // MAIN MELODY
+
+            if (note) {
+
+                playNote(
+                    note,
+                    nextNoteTime,
+                    0.65,
+                    0.35
+                );
+
+            }
+
+
+            // QUIET LOW NOTES
+
+            if (step % 4 === 0) {
+
+                const bassNotes = [
+                    130.81,
+                    110.00,
+                    87.31,
+                    98.00
+                ];
+
+                const bassIndex =
+                    Math.floor(
+                        step / 4
+                    ) % bassNotes.length;
+
+                playNote(
+                    bassNotes[bassIndex],
+                    nextNoteTime,
+                    1.4,
+                    0.18
+                );
+
+            }
+
+
+            // SOFT HIGH SPARKLE
+
+            if (step % 8 === 6) {
+
+                playNote(
+                    783.99,
+                    nextNoteTime,
+                    0.9,
+                    0.08
+                );
+
+            }
+
+            step++;
+
+            nextNoteTime += beat;
+
+        }
+
+    }
+
+
+    // START MUSIC
+
+    async function startMusic() {
+
+        createAudio();
+
+        if (!audioContext) {
+            return;
+        }
+
+        try {
+
+            await audioContext.resume();
+
+            if (!enabled) {
+                return;
+            }
+
+            nextNoteTime =
+                audioContext.currentTime + 0.05;
+
+            if (musicTimer !== null) {
+
+                clearInterval(
+                    musicTimer
+                );
+
+            }
+
+            musicTimer = setInterval(
+                scheduleMusic,
+                100
+            );
+
+            scheduleMusic();
+
+        } catch (error) {
+
+            console.debug(
+                "Music unavailable:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // STOP MUSIC
+
+    function stopMusic() {
+
+        if (musicTimer !== null) {
+
+            clearInterval(
+                musicTimer
+            );
+
+            musicTimer = null;
+
+        }
+
+        if (
+            audioContext &&
+            audioContext.state === "running"
+        ) {
+
+            audioContext.suspend();
+
+        }
+
+    }
+
+
+    // UPDATE BUTTON
+
+    function updateButton() {
+
+        toggle.textContent = enabled
+            ? "🎵 Tắt nhạc"
+            : "🎵 Bật nhạc";
+
+        toggle.setAttribute(
+            "aria-pressed",
+            String(enabled)
+        );
+
+    }
+
+
+    // TOGGLE MUSIC
+
+    toggle.addEventListener(
+        "click",
+        () => {
+
+            enabled = !enabled;
+
+            localStorage.setItem(
+                "smarttrash_music",
+                enabled ? "on" : "off"
+            );
+
+            updateButton();
+
+            if (enabled) {
+
+                startMusic();
+
+            } else {
+
+                stopMusic();
+
+            }
+
+        }
+    );
+
+
+    // VOLUME CONTROL
+
+    volumeSlider.value = volume;
+
+    volumeSlider.addEventListener(
+        "input",
+        () => {
+
+            volume = Number(
+                volumeSlider.value
+            );
+
+            localStorage.setItem(
+                "smarttrash_music_volume",
+                String(volume)
+            );
+
+            if (masterGain) {
+
+                masterGain.gain.value =
+                    volume / 100 * 0.15;
+
+            }
+
+        }
+    );
+
+
+    // RESTORE SAVED PREFERENCE
+
+    updateButton();
+
+    // Browsers may require a user interaction
+    // before allowing music to play.
+
+    if (enabled) {
+
+        document.addEventListener(
+            "click",
+            function resumeMusic() {
+
+                if (enabled) {
+
+                    startMusic();
+
+                }
+
+            },
+            { once: true }
+        );
+
+    }
+
+})();
+
+</script>
 
 </body>
 
