@@ -4,6 +4,7 @@ import random
 import os
 
 from questions import get_questions
+from generator import generate_questions
 
 
 app = Flask(__name__)
@@ -12,6 +13,8 @@ app.secret_key = "smart-trash-secret-key"
 
 
 QUESTIONS = get_questions()
+GENERATED_QUESTIONS = generate_questions(start_id=max((q["id"] for q in QUESTIONS), default=0) + 1)
+QUESTIONS.extend(GENERATED_QUESTIONS)
 
 QUESTIONS_PER_ROUND = 100
 
@@ -1053,7 +1056,7 @@ def quick_sort_answer():
     total = session.get("quick_total", 0)
     streak = session.get("quick_streak", 0)
 
-      total += 1
+    total += 1
     new_best = False
 
     best_streak = session.get(
@@ -1078,10 +1081,11 @@ def quick_sort_answer():
     session["quick_total"] = total
     session["quick_streak"] = streak
     session["quick_best_streak"] = best_streak
-print("🔥 ANSWER DEBUG")
-print("streak =", streak)
-print("best_streak =", best_streak)
-print("session best =", session.get("quick_best_streak"))
+    if new_best:
+        conn = get_db()
+        conn.execute("UPDATE players SET quick_best_streak = MAX(quick_best_streak, ?) WHERE name = ?", (best_streak, username))
+        conn.commit()
+        conn.close()
     session["quick_answered"] = True
 
     return render_template(
@@ -1156,9 +1160,6 @@ def quick_sort_timeout():
 @app.route("/quick_sort_next")
 def quick_sort_next():
     username = session.get("player")
-  print("⚡ NEXT DEBUG")
-    print("session streak =", session.get("quick_streak"))
-    print("session best =", session.get("quick_best_streak"))
     if not username:
         return redirect("/")
 
