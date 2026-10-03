@@ -71,6 +71,13 @@ def init_db():
         )
     """)
 
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS quiz_progress (
+            player_name TEXT PRIMARY KEY,
+            round_json TEXT NOT NULL
+        )
+    """)
+
     # Only insert new questions; never change the IDs of saved questions.
     original_ids = [q["id"] for q in QUESTIONS]
     first_id = max(original_ids, default=0) + 1
@@ -246,7 +253,7 @@ def set_name():
 
 
     return redirect(
-        "/start_quiz"
+        "/quiz"
     )
 
 
@@ -293,15 +300,7 @@ def change_name():
         session["player"] = new_name
 
 
-        session.pop(
-            "round_questions",
-            None
-        )
-
-        session.pop(
-            "current_question",
-            None
-        )
+        session.pop("current_question", None)
 
 
         session.pop(
@@ -331,7 +330,7 @@ def change_name():
 
 
         return redirect(
-            "/start_quiz"
+            "/quiz"
         )
 
 
@@ -396,7 +395,7 @@ def change_name():
 
 
     return redirect(
-        "/start_quiz"
+        "/quiz"
     )
 
 
@@ -470,54 +469,23 @@ def switch_player():
     "/start_quiz"
 )
 def start_quiz():
-
-    player = session.get(
-        "player"
-    )
-
-
+    player = session.get("player")
     if not player:
-
         return redirect("/")
 
+    # Existing progress is resumed unless the user explicitly requests a new round.
+    if request.args.get("new") != "1":
+        return redirect("/quiz")
 
     conn = get_db()
-
-
-    conn.execute("""
-        UPDATE players
-        SET score = 0,
-            items = 0
-        WHERE name = ?
-    """, (player,))
-
-
-    conn.execute("""
-        DELETE FROM answered_questions
-        WHERE player_name = ?
-    """, (player,))
-
-
+    conn.execute("UPDATE players SET score = 0, items = 0 WHERE name = ?", (player,))
+    conn.execute("DELETE FROM answered_questions WHERE player_name = ?", (player,))
+    conn.execute("DELETE FROM quiz_progress WHERE player_name = ?", (player,))
     conn.commit()
-
     conn.close()
-
-
-    session.pop(
-        "round_questions",
-        None
-    )
-
-    session.pop(
-        "current_question",
-        None
-    )
-
-
-    return redirect(
-        "/quiz"
-    )
-
+    session.pop("round_questions", None)
+    session.pop("current_question", None)
+    return redirect("/quiz")
 
 
 # =========================================================
@@ -574,27 +542,27 @@ def quiz():
     # CREATE RANDOM ROUND
     # =====================================================
 
-    round_questions = session.get(
-        "round_questions"
-    )
-
+    # Restore the exact question order from the database, not the browser cookie.
+    conn = get_db()
+    saved_round = conn.execute(
+        "SELECT round_json FROM quiz_progress WHERE player_name = ?", (player,)
+    ).fetchone()
+    round_questions = json.loads(saved_round["round_json"]) if saved_round else None
 
     if not round_questions:
         unseen = [q["id"] for q in QUESTIONS if q["id"] not in answered_ids]
         if not unseen:
-            # Every question was answered: start a fresh learning cycle.
-            conn = get_db()
             conn.execute("DELETE FROM answered_questions WHERE player_name = ?", (player,))
-            conn.commit()
-            conn.close()
             answered_ids = set()
             unseen = [q["id"] for q in QUESTIONS]
         round_questions = random.sample(unseen, min(len(unseen), QUESTIONS_PER_ROUND))
-
-        session["round_questions"] = (
-            round_questions
+        conn.execute(
+            "INSERT OR REPLACE INTO quiz_progress (player_name, round_json) VALUES (?, ?)",
+            (player, json.dumps(round_questions))
         )
-
+        conn.commit()
+    conn.close()
+    session["round_questions"] = round_questions
 
 
     # =====================================================
@@ -624,15 +592,7 @@ def quiz():
         )
 
 
-        session.pop(
-            "round_questions",
-            None
-        )
-
-        session.pop(
-            "current_question",
-            None
-        )
+        session.pop("current_question", None)
 
 
         return render_template(
