@@ -22,7 +22,9 @@
 
 <div class="container">
 
-    <!-- MUSIC CONTROLS -->
+    <!-- ========================= -->
+    <!-- BACKGROUND MUSIC -->
+    <!-- ========================= -->
 
     <div style="
         display: flex;
@@ -59,7 +61,7 @@
             id="music-volume"
             min="0"
             max="100"
-            value="40"
+            value="30"
             aria-label="Âm lượng nhạc nền"
             style="width: 100px;"
         >
@@ -67,7 +69,19 @@
     </div>
 
 
+    <!-- REAL MP3 PLAYER -->
+
+    <audio
+        id="background-music"
+        src="{{ url_for('static', filename='music/folk_tales-country-countryside_67sec-610096.mp3') }}"
+        preload="none"
+        loop
+    ></audio>
+
+
+    <!-- ========================= -->
     <!-- TITLE -->
+    <!-- ========================= -->
 
     <h1>
         🗑️ SMART TRASH
@@ -78,7 +92,9 @@
     </p>
 
 
+    <!-- ========================= -->
     <!-- PLAYER BOX -->
+    <!-- ========================= -->
 
     <div class="name-box">
 
@@ -103,6 +119,9 @@
                 Hãy chọn thử thách của bạn!
             </p>
 
+
+            <!-- QUIZ MODE -->
+
             <a
                 class="back-button"
                 href="/start_quiz"
@@ -112,6 +131,9 @@
 
             <br>
             <br>
+
+
+            <!-- QUICK SORT MODE -->
 
             <a
                 class="back-button"
@@ -158,7 +180,11 @@
 
             </form>
 
+
         {% else %}
+
+
+            <!-- NEW PLAYER -->
 
             <h2>
                 👤 Nhập tên của bạn
@@ -183,12 +209,15 @@
 
             </form>
 
+
         {% endif %}
 
     </div>
 
 
+    <!-- ========================= -->
     <!-- LEADERBOARD -->
+    <!-- ========================= -->
 
     <div class="leaderboard">
 
@@ -199,6 +228,7 @@
         <p class="leaderboard-subtitle">
             🌱 Ai sẽ trở thành Eco Champion?
         </p>
+
 
         {% if players %}
 
@@ -269,6 +299,7 @@
 
             {% endfor %}
 
+
         {% else %}
 
             <p>
@@ -280,7 +311,9 @@
     </div>
 
 
+    <!-- ========================= -->
     <!-- FOOTER -->
+    <!-- ========================= -->
 
     <p class="footer">
         ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
@@ -289,11 +322,16 @@
 </div>
 
 
-<!-- BACKGROUND MUSIC SYSTEM -->
+<!-- ========================= -->
+<!-- SIMPLE MP3 MUSIC SYSTEM -->
+<!-- ========================= -->
 
 <script>
 
 (() => {
+
+    const music =
+        document.getElementById("background-music");
 
     const toggle =
         document.getElementById("music-toggle");
@@ -301,9 +339,8 @@
     const slider =
         document.getElementById("music-volume");
 
-    const AudioContextClass =
-        window.AudioContext ||
-        window.webkitAudioContext;
+
+    // LOAD SAVED SETTINGS
 
     let enabled =
         localStorage.getItem("smarttrash_music") === "on";
@@ -311,11 +348,11 @@
     let volume = Number(
         localStorage.getItem(
             "smarttrash_music_volume"
-        ) ?? 40
+        ) ?? 30
     );
 
     if (!Number.isFinite(volume)) {
-        volume = 40;
+        volume = 30;
     }
 
     volume = Math.max(
@@ -323,296 +360,15 @@
         Math.min(100, volume)
     );
 
-    let audioContext = null;
 
-    let masterGain = null;
+    // INITIAL VOLUME
 
-    let timer = null;
+    music.volume = volume / 100;
 
-    let nextNoteTime = 0;
+    slider.value = volume;
 
-    let step = 0;
 
-
-    // ORIGINAL FOREST MELODY
-
-    const melody = [
-
-        392.00,
-        440.00,
-        523.25,
-        440.00,
-
-        392.00,
-        329.63,
-        349.23,
-        392.00,
-
-        440.00,
-        392.00,
-        329.63,
-        293.66,
-
-        329.63,
-        349.23,
-        392.00,
-        0
-
-    ];
-
-
-    // BASS NOTES
-
-    const bass = [
-
-        130.81,
-        110.00,
-        87.31,
-        98.00
-
-    ];
-
-
-    // CREATE AUDIO
-
-    function createAudio() {
-
-        if (audioContext || !AudioContextClass) {
-            return;
-        }
-
-        audioContext =
-            new AudioContextClass();
-
-        masterGain =
-            audioContext.createGain();
-
-        masterGain.gain.value =
-            volume / 100 * 0.5;
-
-        masterGain.connect(
-            audioContext.destination
-        );
-
-    }
-
-
-    // PLAY ONE NOTE
-
-    function playNote(
-        frequency,
-        startTime,
-        duration,
-        strength
-    ) {
-
-        if (!audioContext || !frequency) {
-            return;
-        }
-
-        const oscillator =
-            audioContext.createOscillator();
-
-        const gain =
-            audioContext.createGain();
-
-        oscillator.type = "triangle";
-
-        oscillator.frequency.setValueAtTime(
-            frequency,
-            startTime
-        );
-
-        gain.gain.setValueAtTime(
-            0.0001,
-            startTime
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            strength,
-            startTime + 0.04
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            startTime + duration
-        );
-
-        oscillator.connect(gain);
-
-        gain.connect(masterGain);
-
-        oscillator.start(
-            startTime
-        );
-
-        oscillator.stop(
-            startTime + duration + 0.02
-        );
-
-        oscillator.onended = () => {
-
-            oscillator.disconnect();
-
-            gain.disconnect();
-
-        };
-
-    }
-
-
-    // MUSIC SCHEDULER
-
-    function scheduleMusic() {
-
-        if (
-            !enabled ||
-            !audioContext ||
-            audioContext.state !== "running"
-        ) {
-            return;
-        }
-
-        const beat = 0.48;
-
-        while (
-            nextNoteTime <
-            audioContext.currentTime + 0.15
-        ) {
-
-            const note =
-                melody[step % melody.length];
-
-            // MAIN MELODY
-
-            if (note) {
-
-                playNote(
-                    note,
-                    nextNoteTime,
-                    0.38,
-                    0.45
-                );
-
-            }
-
-
-            // BASS EVERY FOUR BEATS
-
-            if (step % 4 === 0) {
-
-                const bassIndex =
-                    Math.floor(step / 4) %
-                    bass.length;
-
-                playNote(
-                    bass[bassIndex],
-                    nextNoteTime,
-                    1.1,
-                    0.20
-                );
-
-            }
-
-            step++;
-
-            nextNoteTime += beat;
-
-        }
-
-    }
-
-
-    // START MUSIC
-
-    async function startMusic() {
-
-        if (timer !== null) {
-            return;
-        }
-
-        createAudio();
-
-        if (!audioContext) {
-            return;
-        }
-
-        try {
-
-            await audioContext.resume();
-
-            if (!enabled || timer !== null) {
-                return;
-            }
-
-            nextNoteTime =
-                audioContext.currentTime + 0.05;
-
-            timer = setInterval(
-                scheduleMusic,
-                100
-            );
-
-            scheduleMusic();
-
-        } catch (error) {
-
-            console.debug(
-                "Music unavailable:",
-                error
-            );
-
-        }
-
-    }
-
-
-    // STOP MUSIC
-
-    function stopMusic() {
-
-        if (timer !== null) {
-
-            clearInterval(timer);
-
-            timer = null;
-
-        }
-
-        if (audioContext) {
-
-            masterGain.gain.value = 0;
-
-            if (
-                audioContext.state === "running"
-            ) {
-
-                audioContext.suspend();
-
-            }
-
-        }
-
-    }
-
-
-    // UPDATE VOLUME
-
-    function updateVolume() {
-
-        if (masterGain) {
-
-            masterGain.gain.value =
-                enabled
-                    ? volume / 100 * 0.5
-                    : 0;
-
-        }
-
-    }
-
-
-    // UPDATE BUTTON
+    // UPDATE MUSIC BUTTON
 
     function updateButton() {
 
@@ -624,6 +380,43 @@
             "aria-pressed",
             String(enabled)
         );
+
+        toggle.title = enabled
+            ? "Tắt nhạc nền"
+            : "Bật nhạc nền";
+
+    }
+
+
+    // START MUSIC
+
+    function startMusic() {
+
+        if (!enabled) {
+            return;
+        }
+
+        if (!music.paused) {
+            return;
+        }
+
+        music.play().catch(error => {
+
+            console.debug(
+                "Music playback unavailable:",
+                error
+            );
+
+        });
+
+    }
+
+
+    // STOP MUSIC
+
+    function stopMusic() {
+
+        music.pause();
 
     }
 
@@ -645,8 +438,6 @@
 
             if (enabled) {
 
-                updateVolume();
-
                 startMusic();
 
             } else {
@@ -661,8 +452,6 @@
 
     // VOLUME SLIDER
 
-    slider.value = volume;
-
     slider.addEventListener(
         "input",
         () => {
@@ -671,23 +460,25 @@
                 slider.value
             );
 
+            music.volume =
+                volume / 100;
+
             localStorage.setItem(
                 "smarttrash_music_volume",
                 String(volume)
             );
 
-            updateVolume();
-
         }
     );
 
 
-    // INITIAL SETTINGS
+    // RESTORE SAVED SETTINGS
 
     updateButton();
 
-    // If music was previously enabled,
-    // resume after the next user interaction.
+
+    // BROWSERS REQUIRE USER INTERACTION
+    // BEFORE PLAYING MUSIC
 
     if (enabled) {
 
@@ -695,13 +486,7 @@
             "pointerdown",
             () => {
 
-                if (enabled) {
-
-                    updateVolume();
-
-                    startMusic();
-
-                }
+                startMusic();
 
             },
             { once: true }
