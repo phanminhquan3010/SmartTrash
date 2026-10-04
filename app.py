@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from psycopg2.pool import ThreadedConnectionPool
 import random
 import os
 import json
@@ -27,24 +28,55 @@ QUESTIONS_PER_ROUND = 100
 # DATABASE
 # =========================================================
 
-class DatabaseConnection:
-    """Provide the existing conn.execute interface using PostgreSQL."""
-    def __init__(self):
+# Reuse PostgreSQL connections instead of performing a new SSL handshake
+# for every query. Each Gunicorn worker has its own small pool.
+DB_POOL = None
+
+
+def get_pool():
+    global DB_POOL
+    if DB_POOL is None:
         url = os.environ.get("DATABASE_URL")
         if not url:
             raise RuntimeError("DATABASE_URL is missing. Set it in Render Environment.")
-        self.connection = psycopg2.connect(url, sslmode="require", connect_timeout=15)
+        DB_POOL = ThreadedConnectionPool(
+            minconn=1,
+            maxconn=5,
+            dsn=url,
+            sslmode="require",
+            connect_timeout=15,
+        )
+    return DB_POOL
+
+
+class DatabaseConnection:
+    """Keep the existing conn.execute API while pooling connections."""
+
+    def __init__(self):
+        self.pool = get_pool()
+        self.connection = self.pool.getconn()
+        self.closed = False
 
     def execute(self, sql, params=()):
         cursor = self.connection.cursor(cursor_factory=RealDictCursor)
-        cursor.execute(sql.replace("?", "%s"), params)
-        return cursor
+        try:
+            cursor.execute(sql.replace("?", "%s"), params)
+            return cursor
+        except Exception:
+            cursor.close()
+            raise
 
     def commit(self):
         self.connection.commit()
 
     def close(self):
-        self.connection.close()
+        if not self.closed:
+            self.closed = True
+            try:
+                # End read-only transactions before reusing the connection.
+                self.connection.rollback()
+            finally:
+                self.pool.putconn(self.connection)
 
 
 def get_db():
@@ -545,9 +577,8 @@ def quiz():
         WHERE name = ?
     """, (player,)).fetchone()
 
-    conn.close()
-
     if player_data is None:
+        conn.close()
         session.clear()
         return redirect("/")
 
@@ -557,7 +588,6 @@ def quiz():
     # =====================================================
 
     # Restore the exact question order from the database, not the browser cookie.
-    conn = get_db()
     saved_round = conn.execute(
         "SELECT round_json FROM quiz_progress WHERE player_name = ?", (player,)
     ).fetchone()
@@ -718,21 +748,7 @@ def answer():
     )
 
 
-    question = next(
-
-        (
-
-            q
-
-            for q in QUESTIONS
-
-            if q["id"] == question_id
-
-        ),
-
-        None
-
-    )
+    question = QUESTION_BY_ID.get(question_id)
 
 
     if question is None:
@@ -992,7 +1008,7 @@ def quick_sort():
         correct=0,
         total=0,
         streak=0,
-        best_streak=get_quick_best_streak(username),
+        best_streak=session["quick_best_streak"],
         new_best=False,
         leaderboard=get_quick_leaderboard(),
         answered=False,
