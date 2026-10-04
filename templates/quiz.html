@@ -22,37 +22,104 @@
 
 <div class="container">
 
-    <!-- SOUND BUTTON -->
+    <!-- ========================= -->
+    <!-- AUDIO CONTROLS -->
+    <!-- ========================= -->
 
-    <button
-        type="button"
-        id="sound-toggle"
-        aria-label="Bật hoặc tắt âm thanh"
-        aria-pressed="true"
-        style="
-            float: right;
-            cursor: pointer;
-            border: 0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            background: #e8f5e9;
-            color: #1b5e20;
-            font-size: 18px;
-        "
-    >
-        🔊
-    </button>
+    <div style="
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    ">
+
+        <!-- SOUND EFFECTS -->
+
+        <button
+            type="button"
+            id="sound-toggle"
+            aria-label="Bật hoặc tắt hiệu ứng âm thanh"
+            aria-pressed="true"
+            style="
+                cursor: pointer;
+                border: 0;
+                border-radius: 10px;
+                padding: 10px 14px;
+                background: #e8f5e9;
+                color: #1b5e20;
+                font-size: 18px;
+            "
+        >
+            🔊
+        </button>
 
 
+        <!-- MUSIC BUTTON -->
+
+        <button
+            type="button"
+            id="music-toggle"
+            aria-label="Bật hoặc tắt nhạc nền"
+            aria-pressed="false"
+            style="
+                cursor: pointer;
+                border: 0;
+                border-radius: 10px;
+                padding: 10px 14px;
+                background: #e8f5e9;
+                color: #1b5e20;
+                font-size: 16px;
+            "
+        >
+            🎵 Bật nhạc
+        </button>
+
+
+        <!-- MUSIC VOLUME -->
+
+        <label for="music-volume">
+            🔉
+        </label>
+
+        <input
+            type="range"
+            id="music-volume"
+            min="0"
+            max="100"
+            value="30"
+            aria-label="Âm lượng nhạc nền"
+            style="width: 100px;"
+        >
+
+    </div>
+
+
+    <!-- BACKGROUND MUSIC FILE -->
+
+    <audio
+        id="background-music"
+        src="{{ url_for('static', filename='music/quiz.mp3') }}"
+        preload="none"
+        loop
+    ></audio>
+
+
+    <!-- ========================= -->
     <!-- FINISHED -->
+    <!-- ========================= -->
 
     {% if finished %}
 
-        <h1>🎉 Hoàn thành!</h1>
+        <h1>
+            🎉 Hoàn thành!
+        </h1>
 
         <p>
             Bạn đã hoàn thành {{ total }} câu hỏi!
         </p>
+
 
         <div class="name-box">
 
@@ -66,7 +133,9 @@
 
         </div>
 
+
         <br>
+
 
         <a
             class="back-button"
@@ -75,8 +144,10 @@
             🔄 Chơi lại
         </a>
 
+
         <br>
         <br>
+
 
         <a
             class="back-button"
@@ -89,7 +160,9 @@
     {% else %}
 
 
+        <!-- ========================= -->
         <!-- QUIZ HEADER -->
+        <!-- ========================= -->
 
         <h1>
             🗑️ SMART TRASH
@@ -100,7 +173,9 @@
         </p>
 
 
+        <!-- ========================= -->
         <!-- PROGRESS -->
+        <!-- ========================= -->
 
         <div class="name-box">
 
@@ -120,10 +195,13 @@
 
         </div>
 
+
         <br>
 
 
+        <!-- ========================= -->
         <!-- QUESTION -->
+        <!-- ========================= -->
 
         <div class="leaderboard">
 
@@ -134,7 +212,10 @@
 
             {% if not answered %}
 
+
+                <!-- ========================= -->
                 <!-- ANSWERS -->
+                <!-- ========================= -->
 
                 <form
                     action="/answer"
@@ -159,7 +240,10 @@
 
             {% else %}
 
+
+                <!-- ========================= -->
                 <!-- RESULT -->
+                <!-- ========================= -->
 
                 {% if is_correct %}
 
@@ -175,6 +259,7 @@
                         </p>
 
                     </div>
+
 
                 {% else %}
 
@@ -196,10 +281,13 @@
 
                 {% endif %}
 
+
                 <br>
 
 
+                <!-- ========================= -->
                 <!-- NEXT QUESTION -->
+                <!-- ========================= -->
 
                 <a
                     class="back-button"
@@ -208,14 +296,18 @@
                     ➡️ Câu tiếp theo
                 </a>
 
+
             {% endif %}
 
         </div>
 
+
     {% endif %}
 
 
+    <!-- ========================= -->
     <!-- FOOTER -->
+    <!-- ========================= -->
 
     <p class="footer">
         ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
@@ -224,20 +316,22 @@
 </div>
 
 
-<!-- SOUND SYSTEM -->
+<!-- ========================= -->
+<!-- SOUND EFFECTS SYSTEM -->
+<!-- ========================= -->
 
 <script>
 
 (() => {
 
-    const toggle = document.getElementById("sound-toggle");
+    const toggle =
+        document.getElementById("sound-toggle");
 
     let enabled =
         localStorage.getItem("smarttrash_sound") !== "off";
 
     let audioContext = null;
 
-    // MAXIMUM VOLUME
     const VOLUME = 1.0;
 
 
@@ -245,7 +339,8 @@
 
     function updateToggle() {
 
-        toggle.textContent = enabled ? "🔊" : "🔇";
+        toggle.textContent =
+            enabled ? "🔊" : "🔇";
 
         toggle.setAttribute(
             "aria-pressed",
@@ -253,13 +348,13 @@
         );
 
         toggle.title = enabled
-            ? "Tắt âm thanh"
-            : "Bật âm thanh";
+            ? "Tắt hiệu ứng âm thanh"
+            : "Bật hiệu ứng âm thanh";
 
     }
 
 
-    // CREATE A SOUND
+    // CREATE SOUND
 
     function tone(
         frequency,
@@ -284,11 +379,18 @@
             }
 
             if (!audioContext) {
-                audioContext = new Context();
+
+                audioContext =
+                    new Context();
+
             }
 
-            if (audioContext.state === "suspended") {
+            if (
+                audioContext.state === "suspended"
+            ) {
+
                 audioContext.resume();
+
             }
 
             const oscillator =
@@ -414,15 +516,17 @@
                 1046.5
             ];
 
-            notes.forEach((note, i) => {
+            notes.forEach(
+                (note, i) => {
 
-                tone(
-                    note,
-                    i * 0.14,
-                    0.26
-                );
+                    tone(
+                        note,
+                        i * 0.14,
+                        0.26
+                    );
 
-            });
+                }
+            );
 
         }
 
@@ -431,30 +535,31 @@
 
     // SOUND ON / OFF
 
-    toggle.addEventListener("click", () => {
+    toggle.addEventListener(
+        "click",
+        () => {
 
-        enabled = !enabled;
+            enabled = !enabled;
 
-        localStorage.setItem(
-            "smarttrash_sound",
-            enabled ? "on" : "off"
-        );
-
-        updateToggle();
-
-        // TEST SOUND WHEN ENABLED
-
-        if (enabled) {
-
-            tone(
-                659.25,
-                0,
-                0.12
+            localStorage.setItem(
+                "smarttrash_sound",
+                enabled ? "on" : "off"
             );
 
-        }
+            updateToggle();
 
-    });
+            if (enabled) {
+
+                tone(
+                    659.25,
+                    0,
+                    0.12
+                );
+
+            }
+
+        }
+    );
 
 
     updateToggle();
@@ -489,11 +594,181 @@
     ;
 
 
-    // PLAY RESULT SOUND
-
     if (result) {
 
         playResult(result);
+
+    }
+
+})();
+
+</script>
+
+
+<!-- ========================= -->
+<!-- BACKGROUND MUSIC SYSTEM -->
+<!-- ========================= -->
+
+<script>
+
+(() => {
+
+    const music =
+        document.getElementById("background-music");
+
+    const toggle =
+        document.getElementById("music-toggle");
+
+    const slider =
+        document.getElementById("music-volume");
+
+
+    // LOAD SAVED SETTINGS
+
+    let enabled =
+        localStorage.getItem("smarttrash_music") === "on";
+
+    let volume = Number(
+        localStorage.getItem(
+            "smarttrash_music_volume"
+        ) ?? 30
+    );
+
+    if (!Number.isFinite(volume)) {
+
+        volume = 30;
+
+    }
+
+    volume = Math.max(
+        0,
+        Math.min(100, volume)
+    );
+
+
+    // SET INITIAL VOLUME
+
+    music.volume =
+        volume / 100;
+
+    slider.value =
+        volume;
+
+
+    // UPDATE BUTTON
+
+    function updateButton() {
+
+        toggle.textContent = enabled
+            ? "🎵 Tắt nhạc"
+            : "🎵 Bật nhạc";
+
+        toggle.setAttribute(
+            "aria-pressed",
+            String(enabled)
+        );
+
+    }
+
+
+    // START MUSIC
+
+    function startMusic() {
+
+        if (!enabled) {
+            return;
+        }
+
+        if (!music.paused) {
+            return;
+        }
+
+        music.play().catch(error => {
+
+            console.debug(
+                "Music playback blocked:",
+                error
+            );
+
+        });
+
+    }
+
+
+    // STOP MUSIC
+
+    function stopMusic() {
+
+        music.pause();
+
+    }
+
+
+    // MUSIC BUTTON
+
+    toggle.addEventListener(
+        "click",
+        () => {
+
+            enabled = !enabled;
+
+            localStorage.setItem(
+                "smarttrash_music",
+                enabled ? "on" : "off"
+            );
+
+            updateButton();
+
+            if (enabled) {
+
+                startMusic();
+
+            } else {
+
+                stopMusic();
+
+            }
+
+        }
+    );
+
+
+    // VOLUME SLIDER
+
+    slider.addEventListener(
+        "input",
+        () => {
+
+            volume = Number(
+                slider.value
+            );
+
+            music.volume =
+                volume / 100;
+
+            localStorage.setItem(
+                "smarttrash_music_volume",
+                String(volume)
+            );
+
+        }
+    );
+
+
+    // INITIAL SETTINGS
+
+    updateButton();
+
+
+    // RESUME MUSIC AFTER USER INTERACTION
+
+    if (enabled) {
+
+        document.addEventListener(
+            "pointerdown",
+            startMusic,
+            { once: true }
+        );
 
     }
 
