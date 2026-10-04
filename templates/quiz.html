@@ -4,38 +4,27 @@
 
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Smart Trash Quiz</title>
 
-    <link
-        rel="stylesheet"
-        href="/static/style.css"
-    >
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
 
 <div class="container">
 
-    <!-- ========================= -->
     <!-- AUDIO CONTROLS -->
-    <!-- ========================= -->
 
     <div style="
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin-bottom: 15px;
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        flex-wrap:wrap;
+        gap:10px;
+        margin-bottom:15px;
     ">
-
-        <!-- SOUND EFFECTS -->
 
         <button
             type="button"
@@ -43,20 +32,17 @@
             aria-label="Bật hoặc tắt hiệu ứng âm thanh"
             aria-pressed="true"
             style="
-                cursor: pointer;
-                border: 0;
-                border-radius: 10px;
-                padding: 10px 14px;
-                background: #e8f5e9;
-                color: #1b5e20;
-                font-size: 18px;
+                cursor:pointer;
+                border:0;
+                border-radius:10px;
+                padding:10px 14px;
+                background:#e8f5e9;
+                color:#1b5e20;
+                font-size:18px;
             "
         >
             🔊
         </button>
-
-
-        <!-- MUSIC BUTTON -->
 
         <button
             type="button"
@@ -64,20 +50,17 @@
             aria-label="Bật hoặc tắt nhạc nền"
             aria-pressed="false"
             style="
-                cursor: pointer;
-                border: 0;
-                border-radius: 10px;
-                padding: 10px 14px;
-                background: #e8f5e9;
-                color: #1b5e20;
-                font-size: 16px;
+                cursor:pointer;
+                border:0;
+                border-radius:10px;
+                padding:10px 14px;
+                background:#e8f5e9;
+                color:#1b5e20;
+                font-size:16px;
             "
         >
             🎵 Bật nhạc
         </button>
-
-
-        <!-- MUSIC VOLUME -->
 
         <label for="music-volume">
             🔉
@@ -90,36 +73,31 @@
             max="100"
             value="30"
             aria-label="Âm lượng nhạc nền"
-            style="width: 100px;"
+            style="width:100px;"
         >
 
     </div>
 
 
-    <!-- BACKGROUND MUSIC FILE -->
+    <!-- QUIZ MUSIC -->
 
     <audio
         id="background-music"
         src="{{ url_for('static', filename='music/quiz.mp3') }}"
-        preload="none"
+        preload="auto"
         loop
     ></audio>
 
 
-    <!-- ========================= -->
     <!-- FINISHED -->
-    <!-- ========================= -->
 
     {% if finished %}
 
-        <h1>
-            🎉 Hoàn thành!
-        </h1>
+        <h1>🎉 Hoàn thành!</h1>
 
         <p>
             Bạn đã hoàn thành {{ total }} câu hỏi!
         </p>
-
 
         <div class="name-box">
 
@@ -133,9 +111,7 @@
 
         </div>
 
-
         <br>
-
 
         <a
             class="back-button"
@@ -144,10 +120,7 @@
             🔄 Chơi lại
         </a>
 
-
-        <br>
-        <br>
-
+        <br><br>
 
         <a
             class="back-button"
@@ -160,9 +133,7 @@
     {% else %}
 
 
-        <!-- ========================= -->
         <!-- QUIZ HEADER -->
-        <!-- ========================= -->
 
         <h1>
             🗑️ SMART TRASH
@@ -173,9 +144,7 @@
         </p>
 
 
-        <!-- ========================= -->
         <!-- PROGRESS -->
-        <!-- ========================= -->
 
         <div class="name-box">
 
@@ -195,13 +164,10 @@
 
         </div>
 
-
         <br>
 
 
-        <!-- ========================= -->
         <!-- QUESTION -->
-        <!-- ========================= -->
 
         <div class="leaderboard">
 
@@ -213,9 +179,7 @@
             {% if not answered %}
 
 
-                <!-- ========================= -->
                 <!-- ANSWERS -->
-                <!-- ========================= -->
 
                 <form
                     action="/answer"
@@ -241,9 +205,7 @@
             {% else %}
 
 
-                <!-- ========================= -->
                 <!-- RESULT -->
-                <!-- ========================= -->
 
                 {% if is_correct %}
 
@@ -259,7 +221,6 @@
                         </p>
 
                     </div>
-
 
                 {% else %}
 
@@ -281,13 +242,10 @@
 
                 {% endif %}
 
-
                 <br>
 
 
-                <!-- ========================= -->
                 <!-- NEXT QUESTION -->
-                <!-- ========================= -->
 
                 <a
                     class="back-button"
@@ -296,18 +254,14 @@
                     ➡️ Câu tiếp theo
                 </a>
 
-
             {% endif %}
 
         </div>
 
-
     {% endif %}
 
 
-    <!-- ========================= -->
     <!-- FOOTER -->
-    <!-- ========================= -->
 
     <p class="footer">
         ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
@@ -316,12 +270,9 @@
 </div>
 
 
-<!-- ========================= -->
-<!-- SOUND EFFECTS SYSTEM -->
-<!-- ========================= -->
+<!-- SOUND EFFECTS -->
 
 <script>
-
 (() => {
 
     const toggle =
@@ -334,8 +285,6 @@
 
     const VOLUME = 1.0;
 
-
-    // UPDATE SOUND BUTTON
 
     function updateToggle() {
 
@@ -353,8 +302,6 @@
 
     }
 
-
-    // CREATE SOUND
 
     function tone(
         frequency,
@@ -379,18 +326,11 @@
             }
 
             if (!audioContext) {
-
-                audioContext =
-                    new Context();
-
+                audioContext = new Context();
             }
 
-            if (
-                audioContext.state === "suspended"
-            ) {
-
+            if (audioContext.state === "suspended") {
                 audioContext.resume();
-
             }
 
             const oscillator =
@@ -426,13 +366,9 @@
 
             oscillator.connect(gain);
 
-            gain.connect(
-                audioContext.destination
-            );
+            gain.connect(audioContext.destination);
 
-            oscillator.start(
-                now + start
-            );
+            oscillator.start(now + start);
 
             oscillator.stop(
                 now + start + duration + 0.02
@@ -450,64 +386,24 @@
     }
 
 
-    // RESULT SOUNDS
-
     function playResult(kind) {
 
         if (!enabled) {
             return;
         }
 
-
-        // CORRECT ANSWER
-
         if (kind === "correct") {
 
-            tone(
-                523.25,
-                0,
-                0.13
-            );
+            tone(523.25, 0, 0.13);
+            tone(659.25, 0.12, 0.13);
+            tone(783.99, 0.24, 0.22);
 
-            tone(
-                659.25,
-                0.12,
-                0.13
-            );
+        } else if (kind === "wrong") {
 
-            tone(
-                783.99,
-                0.24,
-                0.22
-            );
+            tone(330, 0, 0.17, "triangle");
+            tone(261.63, 0.17, 0.24, "triangle");
 
-        }
-
-
-        // WRONG ANSWER
-
-        else if (kind === "wrong") {
-
-            tone(
-                330,
-                0,
-                0.17,
-                "triangle"
-            );
-
-            tone(
-                261.63,
-                0.17,
-                0.24,
-                "triangle"
-            );
-
-        }
-
-
-        // FINISHED QUIZ
-
-        else if (kind === "finished") {
+        } else if (kind === "finished") {
 
             const notes = [
                 523.25,
@@ -516,101 +412,68 @@
                 1046.5
             ];
 
-            notes.forEach(
-                (note, i) => {
+            notes.forEach((note, i) => {
 
-                    tone(
-                        note,
-                        i * 0.14,
-                        0.26
-                    );
+                tone(
+                    note,
+                    i * 0.14,
+                    0.26
+                );
 
-                }
-            );
+            });
 
         }
 
     }
 
 
-    // SOUND ON / OFF
+    toggle.addEventListener("click", () => {
 
-    toggle.addEventListener(
-        "click",
-        () => {
+        enabled = !enabled;
 
-            enabled = !enabled;
+        localStorage.setItem(
+            "smarttrash_sound",
+            enabled ? "on" : "off"
+        );
 
-            localStorage.setItem(
-                "smarttrash_sound",
-                enabled ? "on" : "off"
-            );
+        updateToggle();
 
-            updateToggle();
-
-            if (enabled) {
-
-                tone(
-                    659.25,
-                    0,
-                    0.12
-                );
-
-            }
-
+        if (enabled) {
+            tone(659.25, 0, 0.12);
         }
-    );
+
+    });
 
 
     updateToggle();
 
 
-    // GET RESULT FROM FLASK
-
     const result =
-
         {% if finished %}
-
             "finished"
-
         {% elif answered %}
-
             {% if is_correct %}
-
                 "correct"
-
             {% else %}
-
                 "wrong"
-
             {% endif %}
-
         {% else %}
-
             null
-
         {% endif %}
-
     ;
 
 
     if (result) {
-
         playResult(result);
-
     }
 
 })();
-
 </script>
 
 
-<!-- ========================= -->
-<!-- BACKGROUND MUSIC SYSTEM -->
-<!-- ========================= -->
+<!-- BACKGROUND MUSIC WITH CHECKPOINTS -->
 
 <script>
-
 (() => {
 
     const music =
@@ -622,8 +485,11 @@
     const slider =
         document.getElementById("music-volume");
 
+    const MUSIC_KEY =
+        "smarttrash_quiz_music_position";
 
-    // LOAD SAVED SETTINGS
+
+    // SAVED SETTINGS
 
     let enabled =
         localStorage.getItem("smarttrash_music") === "on";
@@ -635,9 +501,7 @@
     );
 
     if (!Number.isFinite(volume)) {
-
         volume = 30;
-
     }
 
     volume = Math.max(
@@ -645,14 +509,66 @@
         Math.min(100, volume)
     );
 
+    music.volume = volume / 100;
 
-    // SET INITIAL VOLUME
+    slider.value = volume;
 
-    music.volume =
-        volume / 100;
 
-    slider.value =
-        volume;
+    // RESTORE MUSIC POSITION
+
+    const savedPosition = Number(
+        sessionStorage.getItem(MUSIC_KEY) ?? 0
+    );
+
+    music.addEventListener(
+        "loadedmetadata",
+        () => {
+
+            if (
+                Number.isFinite(savedPosition) &&
+                savedPosition > 0 &&
+                Number.isFinite(music.duration) &&
+                music.duration > 0
+            ) {
+
+                music.currentTime =
+                    savedPosition % music.duration;
+
+            }
+
+        },
+        { once: true }
+    );
+
+
+    // SAVE POSITION DURING PLAYBACK
+
+    music.addEventListener(
+        "timeupdate",
+        () => {
+
+            sessionStorage.setItem(
+                MUSIC_KEY,
+                String(music.currentTime)
+            );
+
+        }
+    );
+
+
+    // SAVE POSITION BEFORE LEAVING
+
+    window.addEventListener(
+        "pagehide",
+        () => {
+
+            sessionStorage.setItem(
+                MUSIC_KEY,
+                String(music.currentTime)
+            );
+
+        }
+    );
 
 
     // UPDATE BUTTON
@@ -668,6 +584,10 @@
             String(enabled)
         );
 
+        toggle.title = enabled
+            ? "Tắt nhạc nền"
+            : "Bật nhạc nền";
+
     }
 
 
@@ -675,11 +595,7 @@
 
     function startMusic() {
 
-        if (!enabled) {
-            return;
-        }
-
-        if (!music.paused) {
+        if (!enabled || !music.paused) {
             return;
         }
 
@@ -743,8 +659,7 @@
                 slider.value
             );
 
-            music.volume =
-                volume / 100;
+            music.volume = volume / 100;
 
             localStorage.setItem(
                 "smarttrash_music_volume",
@@ -760,9 +675,14 @@
     updateButton();
 
 
-    // RESUME MUSIC AFTER USER INTERACTION
+    // TRY TO RESUME MUSIC
 
     if (enabled) {
+
+        startMusic();
+
+        // If Chrome blocks autoplay,
+        // resume on the next interaction.
 
         document.addEventListener(
             "pointerdown",
@@ -773,7 +693,6 @@
     }
 
 })();
-
 </script>
 
 </body>
