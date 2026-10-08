@@ -1,180 +1,48 @@
-
-import random
-
-TRASH_DATA = {
-    # RAC TAI CHE
-    "Chai nhựa sạch": "Rác tái chế ♻️",
-    "Lon nhôm": "Rác tái chế ♻️",
-    "Giấy sạch": "Rác tái chế ♻️",
-    "Thùng carton sạch": "Rác tái chế ♻️",
-    "Chai thủy tinh nguyên vẹn": "Rác tái chế ♻️",
-    "Hộp giấy sạch": "Rác tái chế ♻️",
-    "Lon thép sạch": "Rác tái chế ♻️",
-    "Sách báo cũ": "Rác tái chế ♻️",
-
-    # RAC HUU CO
-    "Vỏ chuối": "Rác hữu cơ 🌱",
-    "Vỏ cam": "Rác hữu cơ 🌱",
-    "Lá cây": "Rác hữu cơ 🌱",
-    "Bã cà phê": "Rác hữu cơ 🌱",
-    "Vỏ trứng": "Rác hữu cơ 🌱",
-    "Rau củ hỏng": "Rác hữu cơ 🌱",
-    "Vỏ khoai tây": "Rác hữu cơ 🌱",
-    "Bã trà": "Rác hữu cơ 🌱",
-
-    # RAC NGUY HAI
-    "Pin đã sử dụng": "Rác nguy hại 🔋",
-    "Thuốc hết hạn": "Rác nguy hại 🔋",
-    "Bình chứa hóa chất còn dư": "Rác nguy hại 🔋",
-    "Bóng đèn huỳnh quang hỏng": "Rác nguy hại 🔋",
-
-    # RAC DIEN TU
-    "Điện thoại hỏng": "Rác điện tử 💻",
-    "Bàn phím hỏng": "Rác điện tử 💻",
-    "Chuột máy tính hỏng": "Rác điện tử 💻",
-    "Máy tính bảng hỏng": "Rác điện tử 💻",
-    "Bộ sạc điện thoại hỏng": "Rác điện tử 💻",
-    "Tai nghe hỏng": "Rác điện tử 💻"
+"""Vietnamese question bank. Append items to preserve existing IDs."""
+import json
+from pathlib import Path
+BINS = {
+    'recycle': ('♻️ Tái chế', 'Làm rỗng, giữ sạch và khô; giao cho đơn vị thu gom tái chế.'),
+    'organic': ('🌱 Hữu cơ', 'Tách khỏi bao bì; có thể ủ phân khi có hệ thống phù hợp.'),
+    'hazard': ('🔋 Nguy hại', 'Để riêng, không đốt hoặc đổ xuống cống; giao cho điểm thu gom chuyên dụng.'),
+    'ewaste': ('🔌 Điện tử', 'Giao cho điểm thu hồi điện tử; không tự tháo hoặc đốt.'),
+    'other': ('🗑️ Còn lại', 'Thu gom riêng theo hướng dẫn địa phương.')
 }
+MODES = {
+    'quiz': {'name': 'Quiz xanh', 'length': 100, 'seconds': 0},
+    'quick': {'name': 'Phân loại nhanh', 'length': 20, 'seconds': 8},
+    'tf': {'name': 'Đúng / Sai', 'length': 30, 'seconds': 0},
+    'timed': {'name': 'Chạy đua thời gian', 'length': 20, 'seconds': 15}
+}
+TRASH_DATA = json.loads(Path(__file__).with_name('trash_data.json').read_text(encoding='utf-8'))
+ITEMS = [(name, category) for category, names in TRASH_DATA.items() for name in names]
 
-CATEGORIES = list(dict.fromkeys(TRASH_DATA.values()))
+def generate_questions():
+    bank = []
+    for i, (name, category) in enumerate(ITEMS):
+        texts = [f'{name} nên được phân vào nhóm nào?',
+                 f'Khi dọn nhà, bạn thấy {name.lower()}. Hãy chọn nhóm rác phù hợp.',
+                 f'Để tránh trộn lẫn rác, hãy phân loại {name.lower()}.']
+        for v, text in enumerate(texts):
+            bank.append({'id': i * 3 + v, 'text': text, 'item': name,
+                         'answer': category, 'tip': BINS[category][1]})
+    return bank
 
-TEMPLATES = [
-    "{item} thuộc nhóm rác nào?",
-    "Nên phân loại {item} vào nhóm nào?",
-    "Khi thu gom, {item} thuộc loại rác nào?",
-    "Đâu là nhóm rác phù hợp với {item}?"
-]
+QUESTIONS = generate_questions()
 
-ACTIONS = [
-    (
-        "Pin đã sử dụng",
-        "Đưa đến điểm thu gom pin phù hợp",
-        ["Bỏ vào rác hữu cơ", "Đốt cùng rác", "Vứt xuống sông"]
-    ),
-    (
-        "Điện thoại hỏng",
-        "Đưa đến điểm thu gom rác điện tử",
-        ["Bỏ vào rác thực phẩm", "Đốt", "Vứt xuống sông"]
-    ),
-    (
-        "Giấy sạch chỉ dùng một mặt",
-        "Sử dụng tiếp mặt còn lại",
-        ["Vứt ngay", "Ngâm nước", "Đốt"]
-    ),
-    (
-        "Bình nước cá nhân",
-        "Dùng lại nhiều lần khi còn an toàn",
-        ["Vứt sau một lần", "Đốt sau khi dùng", "Thay mới mỗi ngày"]
-    ),
-    (
-        "Vỏ rau củ phù hợp",
-        "Ủ phân khi có điều kiện thích hợp",
-        ["Trộn với pin", "Vứt xuống sông", "Đốt trong phòng"]
-    ),
-    (
-        "Thuốc hết hạn",
-        "Đưa đến nơi tiếp nhận phù hợp theo hướng dẫn địa phương",
-        ["Đổ xuống cống", "Trộn vào thức ăn", "Vứt ra đường"]
-    ),
-    (
-        "Hộp carton sạch",
-        "Tái sử dụng hoặc thu gom tái chế",
-        ["Đổ xuống cống", "Trộn với pin", "Đốt trong phòng"]
-    ),
-    (
-        "Vòi nước không sử dụng",
-        "Khóa vòi để tiết kiệm nước",
-        ["Để nước chảy", "Mở hết cỡ", "Để rò rỉ"]
-    ),
-    (
-        "Đèn trong phòng không có người",
-        "Tắt đèn khi không cần thiết",
-        ["Bật suốt ngày", "Bật thêm đèn", "Không cần quan tâm"]
-    ),
-    (
-        "Đồ chơi còn tốt không dùng nữa",
-        "Tặng hoặc trao đổi để dùng lại",
-        ["Đốt ngay", "Vứt xuống sông", "Chôn ngoài vườn"]
-    )
-]
+def question(qid, mode, round_number):
+    q = dict(QUESTIONS[qid])
+    q['options'] = [{'id': k, 'label': v[0]} for k, v in BINS.items()]
+    if mode == 'quick':
+        q['text'] = q['item']
+    if mode == 'tf':
+        keys = list(BINS)
+        actual = keys.index(q['answer'])
+        claimed = keys[actual if (qid + round_number) % 2 == 0 else (actual + 1 + qid % 4) % len(keys)]
+        q['text'] = f"{q['item']} thuộc nhóm {BINS[claimed][0]}."
+        q['answer'] = 'true' if claimed == q['answer'] else 'false'
+        q['options'] = [{'id': 'true', 'label': 'Đúng'}, {'id': 'false', 'label': 'Sai'}]
+    return q
 
-
-def generate_questions(start_id=1000):
-    questions = []
-    seen = set()
-
-    def add(prompt, answer, options):
-        if prompt in seen:
-            return
-
-        if answer not in options:
-            return
-
-        if len(options) != len(set(options)):
-            return
-
-        seen.add(prompt)
-
-        choices = list(options)
-        random.shuffle(choices)
-
-        questions.append({
-            "id": start_id + len(questions),
-            "question": prompt,
-            "options": choices,
-            "answer": answer
-        })
-
-    # TYPE 1: IDENTIFY WASTE CATEGORY
-
-    for item, answer in TRASH_DATA.items():
-        for template in TEMPLATES:
-            add(
-                template.format(item=item),
-                answer,
-                CATEGORIES
-            )
-
-    # TYPE 2: IDENTIFY AN ITEM IN A CATEGORY
-
-    for category in CATEGORIES:
-        correct_items = [
-            item
-            for item, value in TRASH_DATA.items()
-            if value == category
-        ]
-
-        incorrect_items = [
-            item
-            for item, value in TRASH_DATA.items()
-            if value != category
-        ]
-
-        for item in correct_items:
-            wrong = random.sample(incorrect_items, 3)
-
-            add(
-                f"Trong các vật sau, đâu là vật thuộc nhóm "
-                f"{category} và có tên bắt đầu bằng "
-                f"'{item[0]}'?",
-                item,
-                [item] + wrong
-            )
-
-    # TYPE 3: ENVIRONMENTAL ACTIONS
-
-    for item, correct, wrong in ACTIONS:
-        add(
-            f"Cách xử lý phù hợp với {item} là gì?",
-            correct,
-            [correct] + wrong
-        )
-
-        add(
-            f"Bạn nên làm gì với {item}?",
-            correct,
-            [correct] + wrong
-        )
-
-    return questions
+if __name__ == '__main__':
+    print(f'{len(ITEMS)} vật phẩm; {len(QUESTIONS)} câu hỏi')
