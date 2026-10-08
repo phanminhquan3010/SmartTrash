@@ -1,503 +1,104 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Smart Trash</title>
+    <title>SmartTrash — Phân loại rác thông minh</title>
 
     <link
         rel="stylesheet"
-        href="/static/style.css"
+        href="{{ url_for('static', filename='style.css') }}"
     >
 </head>
 
 <body>
+    <header>
+        <a class="brand" href="#games">♻️ SmartTrash</a>
 
-<div class="container">
+        <nav>
+            <a href="#games">Chơi ngay</a>
+            <a href="#leaderboard">Bảng xếp hạng</a>
+            <a href="#guide">Cẩm nang xanh</a>
+        </nav>
+    </header>
 
-    <!-- ========================= -->
-    <!-- BACKGROUND MUSIC -->
-    <!-- ========================= -->
+    <main>
+        <section class="intro">
+            <span class="tag">
+                MỖI LỰA CHỌN NHỎ · MỘT HÀNH TINH XANH
+            </span>
 
-    <div style="
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 15px;
-    ">
-
-        <button
-            type="button"
-            id="music-toggle"
-            aria-pressed="false"
-            style="
-                cursor: pointer;
-                border: 0;
-                border-radius: 10px;
-                padding: 10px 14px;
-                background: #e8f5e9;
-                color: #1b5e20;
-                font-size: 16px;
-            "
-        >
-            🎵 Bật nhạc
-        </button>
-
-        <label for="music-volume">
-            🔉
-        </label>
-
-        <input
-            type="range"
-            id="music-volume"
-            min="0"
-            max="100"
-            value="30"
-            aria-label="Âm lượng nhạc nền"
-            style="width: 100px;"
-        >
-
-    </div>
-
-
-    <!-- REAL MP3 PLAYER -->
-
-    <audio
-        id="background-music"
-        src="{{ url_for('static', filename='music/folk_tales-country-countryside_67sec-610096.mp3') }}"
-        preload="none"
-        loop
-    ></audio>
-
-
-    <!-- ========================= -->
-    <!-- TITLE -->
-    <!-- ========================= -->
-
-    <h1>
-        🗑️ SMART TRASH
-    </h1>
-
-    <p>
-        Phân loại rác thông minh ♻️
-    </p>
-
-
-    <!-- ========================= -->
-    <!-- PLAYER BOX -->
-    <!-- ========================= -->
-
-    <div class="name-box">
-
-        {% if username %}
-
-            <h2>
-                👋 Xin chào, {{ username }}!
-            </h2>
+            <h1>
+                Phân loại đúng.<br>
+                Sống xanh mỗi ngày.
+            </h1>
 
             <p>
-                Sẵn sàng thử thách kiến thức môi trường?
+                Học cách phân loại rác qua những thử thách vui
+                cùng SmartTrash.
             </p>
+        </section>
 
+        <section class="profile">
+            <div>
+                <strong id="playerName">Người chơi</strong>
+                <p id="totals">Đang tải…</p>
+            </div>
 
-            <!-- GAME MODES -->
+            <button id="rename" type="button">Đổi tên</button>
 
-            <h2>
-                🎮 Chọn chế độ chơi
-            </h2>
+            <button id="reset" class="secondary" type="button">
+                Đặt lại
+            </button>
+        </section>
 
-            <p>
-                Hãy chọn thử thách của bạn!
-            </p>
+        <section class="sound">
+            <button id="soundToggle" type="button">
+                🔊 Bật nhạc
+            </button>
 
-
-            <!-- QUIZ MODE -->
-
-            <a
-                class="back-button"
-                href="/start_quiz"
-            >
-                🧠 Quiz kiến thức
-            </a>
-
-            <br>
-            <br>
-
-
-            <!-- QUICK SORT MODE -->
-
-            <a
-                class="back-button"
-                href="/quick_sort"
-            >
-                ⚡ Phân loại nhanh
-            </a>
-
-            <br>
-            <br>
-
-
-            <!-- SWITCH PLAYER -->
-
-            <a
-                class="back-button"
-                href="/switch_player"
-            >
-                👤 Đổi người chơi
-            </a>
-
-            <br>
-            <br>
-
-
-            <!-- CHANGE / ADD NAME -->
-
-            <form
-                action="/change_name"
-                method="POST"
-            >
-
+            <label for="volume">
+                Âm lượng
                 <input
-                    type="text"
-                    name="name"
-                    placeholder="Tên người chơi..."
-                    maxlength="20"
-                    required
+                    id="volume"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="0.7"
                 >
-
-                <button type="submit">
-                    ➕ Chuyển sang tên này
-                </button>
-
-            </form>
-
-
-        {% else %}
-
-
-            <!-- NEW PLAYER -->
-
-            <h2>
-                👤 Nhập tên của bạn
-            </h2>
-
-            <form
-                action="/set_name"
-                method="POST"
-            >
-
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Tên của bạn..."
-                    maxlength="20"
-                    required
-                >
-
-                <button type="submit">
-                    🚀 Bắt đầu
-                </button>
-
-            </form>
-
-
-        {% endif %}
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- LEADERBOARD -->
-    <!-- ========================= -->
-
-    <div class="leaderboard">
-
-        <h2>
-            🏆 TOP PLAYERS
-        </h2>
-
-        <p class="leaderboard-subtitle">
-            🌱 Ai sẽ trở thành Eco Champion?
-        </p>
-
-
-        {% if players %}
-
-            {% for player in players %}
-
-                <div
-                    class="
-                        player
-                        {% if player['name'] == username %}
-                            current-player
-                        {% endif %}
-                    "
-                >
-
-                    <!-- RANK -->
-
-                    <span class="rank">
-
-                        {% if loop.index == 1 %}
-
-                            🥇
-
-                        {% elif loop.index == 2 %}
-
-                            🥈
-
-                        {% elif loop.index == 3 %}
-
-                            🥉
-
-                        {% else %}
-
-                            #{{ loop.index }}
-
-                        {% endif %}
-
-                    </span>
-
-
-                    <!-- NAME -->
-
-                    <span class="player-name">
-
-                        {{ player["name"] }}
-
-                        {% if player["name"] == username %}
-
-                            ⭐ Bạn
-
-                        {% endif %}
-
-                    </span>
-
-
-                    <!-- SCORE -->
-
-                    <span class="player-score">
-
-                        🌱 {{ player["score"] }}
-
-                        <small>
-                            · ♻️ {{ player["items"] }}
-                        </small>
-
-                    </span>
-
-                </div>
-
-            {% endfor %}
-
-
-        {% else %}
-
-            <p>
-                🌱 Chưa có người chơi nào.
-            </p>
-
-        {% endif %}
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- FOOTER -->
-    <!-- ========================= -->
-
-    <p class="footer">
-        ♻️ Smart Trash · Vì một môi trường xanh hơn 🌱
-    </p>
-
-</div>
-
-
-<!-- ========================= -->
-<!-- SIMPLE MP3 MUSIC SYSTEM -->
-<!-- ========================= -->
-
-<script>
-
-(() => {
-
-    const music =
-        document.getElementById("background-music");
-
-    const toggle =
-        document.getElementById("music-toggle");
-
-    const slider =
-        document.getElementById("music-volume");
-
-
-    // LOAD SAVED SETTINGS
-
-    let enabled =
-        localStorage.getItem("smarttrash_music") === "on";
-
-    let volume = Number(
-        localStorage.getItem(
-            "smarttrash_music_volume"
-        ) ?? 30
-    );
-
-    if (!Number.isFinite(volume)) {
-        volume = 30;
-    }
-
-    volume = Math.max(
-        0,
-        Math.min(100, volume)
-    );
-
-
-    // INITIAL VOLUME
-
-    music.volume = volume / 100;
-
-    slider.value = volume;
-
-
-    // UPDATE MUSIC BUTTON
-
-    function updateButton() {
-
-        toggle.textContent = enabled
-            ? "🎵 Tắt nhạc"
-            : "🎵 Bật nhạc";
-
-        toggle.setAttribute(
-            "aria-pressed",
-            String(enabled)
-        );
-
-        toggle.title = enabled
-            ? "Tắt nhạc nền"
-            : "Bật nhạc nền";
-
-    }
-
-
-    // START MUSIC
-
-    function startMusic() {
-
-        if (!enabled) {
-            return;
-        }
-
-        if (!music.paused) {
-            return;
-        }
-
-        music.play().catch(error => {
-
-            console.debug(
-                "Music playback unavailable:",
-                error
-            );
-
-        });
-
-    }
-
-
-    // STOP MUSIC
-
-    function stopMusic() {
-
-        music.pause();
-
-    }
-
-
-    // MUSIC BUTTON
-
-    toggle.addEventListener(
-        "click",
-        () => {
-
-            enabled = !enabled;
-
-            localStorage.setItem(
-                "smarttrash_music",
-                enabled ? "on" : "off"
-            );
-
-            updateButton();
-
-            if (enabled) {
-
-                startMusic();
-
-            } else {
-
-                stopMusic();
-
-            }
-
-        }
-    );
-
-
-    // VOLUME SLIDER
-
-    slider.addEventListener(
-        "input",
-        () => {
-
-            volume = Number(
-                slider.value
-            );
-
-            music.volume =
-                volume / 100;
-
-            localStorage.setItem(
-                "smarttrash_music_volume",
-                String(volume)
-            );
-
-        }
-    );
-
-
-    // RESTORE SAVED SETTINGS
-
-    updateButton();
-
-
-    // BROWSERS REQUIRE USER INTERACTION
-    // BEFORE PLAYING MUSIC
-
-    if (enabled) {
-
-        document.addEventListener(
-            "pointerdown",
-            () => {
-
-                startMusic();
-
-            },
-            { once: true }
-        );
-
-    }
-
-})();
-
-</script>
-
+            </label>
+
+            <small>Ai Là Triệu Phú · cả bốn chế độ</small>
+
+            <audio
+                id="music"
+                loop
+                preload="none"
+                src="{{ url_for('static', filename='audio/ai-la-trieu-phu.mp3') }}"
+            ></audio>
+        </section>
+
+        <div
+            id="notice"
+            role="status"
+            aria-live="polite"
+        ></div>
+
+        <div id="content"></div>
+
+        <footer>
+            Phan Minh Quân · Lớp 8A5 · THCS Nguyễn Trãi<br>
+            Phân loại theo hướng dẫn của đơn vị thu gom
+            tại địa phương.
+        </footer>
+    </main>
+
+    <script>
+        window.CONFIG = {{ {'modes': modes, 'bins': bins}|tojson }};
+    </script>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
-
 </html>
