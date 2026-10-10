@@ -50,7 +50,38 @@ async function refresh(){try{await api();render();}catch(e){notice.textContent=e
 async function start(mode){if(busy)return;busy=true;notice.textContent='';try{await api({action:'start',mode});feedback=null;}catch(e){notice.textContent=e.message;}finally{busy=false;render();}}
 async function navigate(){feedback=null;const page=section();if(page.startsWith('play-')&&modes[page.slice(5)]&&!state?.games[page.slice(5)]?.question)await start(page.slice(5));else await refresh();}
 function effect(ok){if(music.paused)return;try{audioCtx??=new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume();const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.frequency.value=ok?760:180;gain.gain.setValueAtTime(0.2*Number(document.querySelector('#volume').value),audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+.3);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+.3);}catch{}}
-async function answer(mode,value){if(busy)return;const g=state.games[mode];if(!g?.question)return;busy=true;render();try{const body=await api({action:'answer',mode,answer:value,token:g.token});feedback=body.feedback;effect(feedback.correct);notice.textContent='';}catch(e){notice.textContent=e.message;}finally{busy=false;render();}}
+async function answer(mode, value) {
+    if (busy) return;
+
+    const g = state.games[mode];
+    if (!g?.question) return;
+
+    busy = true;
+    feedback = null;
+    render();
+
+    try {
+        const body = await api({
+            action: 'answer',
+            mode,
+            answer: value,
+            token: g.token
+        });
+
+        feedback = body.feedback;
+        effect(feedback.correct);
+        notice.textContent = '';
+
+        // Clear feedback before the next question is rendered.
+        feedback = null;
+
+    } catch (e) {
+        notice.textContent = e.message;
+    } finally {
+        busy = false;
+        render();
+    }
+}
 function tick(){const page=section();if(!page.startsWith('play-')||busy)return;const mode=page.slice(5),g=state?.games[mode];if(!g?.question||!g.deadline)return;const left=Math.max(0,g.deadline-Date.now()/1000-clockOffset);const timer=document.querySelector('#timer'),bar=document.querySelector('#timerbar');if(timer)timer.textContent=Math.ceil(left)+' giây';if(bar)bar.value=left;if(left===0)answer(mode,null);}
 setInterval(tick,250);
 function audioUI(){const playing=!music.paused;document.querySelector('#soundToggle').textContent=playing?'🔊':'🔇';document.querySelector('#soundToggle').setAttribute('aria-label',playing?'Tắt âm thanh':'Bật âm thanh');document.querySelector('#audioStatus').textContent=playing?'Nhạc & hiệu ứng đang bật':'Bấm để bật nhạc & hiệu ứng';}
